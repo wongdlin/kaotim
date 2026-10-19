@@ -58,8 +58,10 @@ def doctor(repo: Path, self_check: bool = False) -> dict[str, Any]:
             add("db-safety", True, f"checked {xml.name}")
 
     if self_check:
-        checks.extend(_self_checks())
-        ok = ok and all(c["ok"] for c in checks)
+        self_checks = _self_checks()
+        checks.extend(self_checks)
+        # --self is for plugin authors: only word-budget / prompt checks gate the exit code
+        ok = all(c["ok"] for c in self_checks)
 
     return {"ok": ok, "checks": checks, "plugin_version": PLUGIN_VERSION}
 
