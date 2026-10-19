@@ -1,0 +1,9 @@
+# Kaotim runtime files (spec §2.2)
+.kaotim/handoffs/
+.kaotim/gates/
+.kaotim/worktrees/
+.kaotim/metrics/*.jsonl
+.kaotim/state.json
+# Spike output
+.kaotim-spike/
+__pycache__/
