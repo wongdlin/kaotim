@@ -10,7 +10,7 @@ class CountWordsTest extends TestCase
     /** AC-1 */
     public function test_ac_1_counts_words_separated_by_whitespace(): void
     {
-        $this->assertSame(3, (new CountWords)->handle("one two  three"));
+        $this->assertSame(3, (new CountWords)->handle('one two  three'));
     }
 
     /** EC-1 */
