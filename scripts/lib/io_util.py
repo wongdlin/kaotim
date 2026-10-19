@@ -33,12 +33,16 @@ def usage(summary: str, **extra: Any) -> int:
 
 
 def atomic_write_text(path: Path, text: str, retries: int = 8) -> None:
+    """Atomic write. Uses open(..., newline) for Python 3.9 (Path.write_text newline= is 3.10+)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + f".{os.getpid()}.tmp")
     last_err: Exception | None = None
     for attempt in range(retries):
         try:
-            tmp.write_text(text, encoding="utf-8", newline="\n")
+            with open(tmp, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(text)
+                fh.flush()
+                os.fsync(fh.fileno())
             os.replace(tmp, path)
             return
         except OSError as exc:
