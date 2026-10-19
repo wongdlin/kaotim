@@ -1,0 +1,38 @@
+# Kaotim plugin defaults (spec §4.5). A repo can override any key in .kaotim/config.yaml.
+# Status: M0 draft. Values marked "unverified" must be confirmed (docs/platform-findings.md).
+
+caps:
+  green_attempts: 5
+  supervisor_rejects: 3
+  structure_refactors: 2
+  bug_fix_rounds: 2
+  question_rounds: 3
+
+parallel:
+  max_agents: 4                 # V4: no documented limit; unverified
+
+# Model tiers (spec §8.1, §14.9). Each value becomes the `model:` frontmatter of the agents in
+# that tier. Allowed values (V2): "inherit" (the parent chat's model) or a Cursor model ID,
+# optionally with options in brackets, e.g. "claude-opus-5[effort=high]".
+# "fast" is used by Cursor's own plugins but is not documented (docs-only).
+# Real IDs depend on the user's plan: run `agent models` and confirm (open question Q5).
+tiers:
+  strong: inherit               # supervisor, bug-reviewer
+  standard: inherit             # test-writer, feature-dev, structure-reviewer, refactorer, fixer
+  fast: fast                    # explorer, cleaner, pr-writer
+
+# Price per million tokens, keyed by the model slug reported in hook payloads (`model`).
+# Used only for the estimated cost line in the metrics summary. Fill from
+# https://cursor.com/docs/models-and-pricing (prices change; keep in the repo config).
+prices: {}
+#   composer-2.5: { input: 0.5, output: 2.5 }
+
+review:
+  bug_severity_block: medium    # findings at or above this must be resolved
+
+budgets:                        # soft token budgets per stage; warn on exceed
+  orchestrator_per_stage: 15000
+  subagent_default: 40000
+
+fast_lane:
+  max_files: 3
