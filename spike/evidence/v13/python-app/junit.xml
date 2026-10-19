@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.026" timestamp="2026-10-19T19:26:55.739925+08:00" hostname="grok-bot-vm-290116408"><testcase classname="tests.test_red" name="test_ac_9_assertion_failure" time="0.000"><failure message="AssertionError: assert 2 == 3&#10; +  where 2 = count_words('a b')">def test_ac_9_assertion_failure() -&gt; None:
+&gt;       assert count_words("a b") == 3
+E       AssertionError: assert 2 == 3
+E        +  where 2 = count_words('a b')
+
+tests/test_red.py:4: AssertionError</failure></testcase><testcase classname="tests.test_red" name="test_ac_8_missing_symbol" time="0.000"><failure message="ImportError: cannot import name 'count_chars' from 'app.services.words' (/tmp/tmp.PA1dByO63d/src/app/services/words.py)">def test_ac_8_missing_symbol() -&gt; None:
+&gt;       from app.services.words import count_chars  # not implemented yet
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ImportError: cannot import name 'count_chars' from 'app.services.words' (/tmp/tmp.PA1dByO63d/src/app/services/words.py)
+
+tests/test_red.py:7: ImportError</failure></testcase></testsuite></testsuites>

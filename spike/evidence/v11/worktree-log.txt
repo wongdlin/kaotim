@@ -1,0 +1,131 @@
++ ## A. worktree inside the repo, NOT gitignored
++ git worktree add -q .kaotim/worktrees/t1 -b kaotim/plan-001/t1
+  -> exit 0
++ git status --porcelain
+?? .kaotim/
+  -> exit 0
++ ## B. add .kaotim/worktrees/ to .gitignore
++ git status --porcelain
+  -> exit 0
++ git worktree list
+/tmp/tmp.oHdvHgrbVD/app                       1448386 [main]
+/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1  d26c6c5 [kaotim/plan-001/t1]
+  -> exit 0
++ ## C. per-stack setup in the worktree (timed)
++ cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1' && git merge -q main && time (composer install --no-interaction --prefer-dist -q && cp .env.example .env.testing)
+
+real	0m2.460s
+user	0m2.325s
+sys	0m0.750s
+  -> exit 0
++ cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1/services/ml' && time uv sync -q
+
+real	0m0.266s
+user	0m0.198s
+sys	0m0.089s
+  -> exit 0
++ ## D. run stack commands from their roots, invoked from an unrelated cwd
++ cd /tmp && cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1' && php artisan test
+{"tool":"pest","result":"passed","tests":3,"passed":3,"assertions":4,"duration_ms":97}
+  -> exit 0
++ cd /tmp && cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1/services/ml' && uv run pytest -q
+..                                                                       [100%]
+2 passed in 0.01s
+  -> exit 0
++ cd /tmp && uv run --directory '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1/services/ml' pytest -q
+..                                                                       [100%]
+2 passed in 0.00s
+  -> exit 0
++ cd /tmp && uv run --project '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1/services/ml' pytest -q
+
+==================================== ERRORS ====================================
+_____________________ ERROR collecting sand-box-store-pack _____________________
+/usr/lib/python3.13/pathlib/_abc.py:482: in is_file
+    return S_ISREG(self.stat(follow_symlinks=follow_symlinks).st_mode)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.13/pathlib/_local.py:517: in stat
+    return os.stat(self, follow_symlinks=follow_symlinks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/tmp/sand-box-store-pack/conftest.py'
+=========================== short test summary info ============================
+ERROR sand-box-store-pack - PermissionError: [Errno 13] Permission denied: '/...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.30s
+  -> exit 2
++ cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1' && uv run pytest -q   # wrong root on purpose
+error: Failed to spawn: pytest
+  cause: No such file or directory (os error 2)
+  -> exit 2
++ git -C '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1' rev-parse --abbrev-ref HEAD
+kaotim/plan-001/t1
+  -> exit 0
++ ## E. root-level tools in the MAIN checkout while a worktree exists
++ composer install --no-interaction --prefer-dist -q && cp .env.example .env.testing
+  -> exit 0
++ vendor/bin/pint --test
+{"tool":"pint","result":"passed"}  -> exit 0
++ env -u CURSOR_AGENT vendor/bin/pint --test 2>&1 | tail -3
+  ──────────────────────────────────────────────────────────────────── Laravel  
+    PASS   .......................................................... 28 files  
+
+  -> exit 0
++ php artisan test
+{"tool":"pest","result":"passed","tests":3,"passed":3,"assertions":4,"duration_ms":129}
+  -> exit 0
++ rg --files | grep -c '^.kaotim/worktrees/' || true
+0
+  -> exit 0
++ ## F. two parallel tasks with disjoint ownership, merged in order
++ git worktree add -q .kaotim/worktrees/t2 -b kaotim/plan-001/t2
+  -> exit 0
++ cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t1' && echo '# t1' >> services/ml/src/app/services/words.py && git commit -qam 't1 change'
+  -> exit 0
++ cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t2' && echo '// t2' >> app/Actions/CountWords.php && git commit -qam 't2 change'
+  -> exit 0
++ git merge --no-ff -q -m 'merge t1' kaotim/plan-001/t1
+  -> exit 0
++ git merge --no-ff -q -m 'merge t2' kaotim/plan-001/t2
+  -> exit 0
++ git log --oneline --graph | head -8
+*   9638e27 merge t2
+|\  
+| * 53e0226 t2 change
+* |   eea0676 merge t1
+|\ \  
+| |/  
+|/|   
+| * 8c2bb02 t1 change
+  -> exit 141
++ ## G. conflicting tasks: merge must fail and be abortable
++ git worktree add -q .kaotim/worktrees/t3 -b kaotim/plan-001/t3
+  -> exit 0
++ git worktree add -q .kaotim/worktrees/t4 -b kaotim/plan-001/t4
+  -> exit 0
++ cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t3' && sed -i 's/one/uno/' README.md 2>/dev/null; echo t3 > CONFLICT.txt && git add -A && git commit -qm t3
+  -> exit 0
++ cd '/tmp/tmp.oHdvHgrbVD/app/.kaotim/worktrees/t4' && echo t4 > CONFLICT.txt && git add -A && git commit -qm t4
+  -> exit 0
++ git merge --no-ff -q -m 'merge t3' kaotim/plan-001/t3
+  -> exit 0
++ git merge --no-ff -q -m 'merge t4' kaotim/plan-001/t4
+Auto-merging CONFLICT.txt
+CONFLICT (add/add): Merge conflict in CONFLICT.txt
+Automatic merge failed; fix conflicts and then commit the result.
+  -> exit 1
++ git diff --name-only --diff-filter=U
+CONFLICT.txt
+  -> exit 0
++ git merge --abort && git status --porcelain
+  -> exit 0
++ ## H. cleanup
++ git worktree remove --force .kaotim/worktrees/t1
+  -> exit 0
++ git worktree remove --force .kaotim/worktrees/t2
+  -> exit 0
++ git worktree remove --force .kaotim/worktrees/t3
+  -> exit 0
++ git worktree remove --force .kaotim/worktrees/t4
+  -> exit 0
++ git worktree prune && git worktree list
+/tmp/tmp.oHdvHgrbVD/app  c42bdb4 [main]
+  -> exit 0

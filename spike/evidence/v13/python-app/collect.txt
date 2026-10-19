@@ -1,0 +1,22 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0
+rootdir: /tmp/tmp.PA1dByO63d
+configfile: pyproject.toml
+collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+____________________ ERROR collecting tests/test_collect.py ____________________
+ImportError while importing test module '/tmp/tmp.PA1dByO63d/tests/test_collect.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_collect.py:1: in <module>
+    import app.services.missing_module
+E   ModuleNotFoundError: No module named 'app.services.missing_module'
+---------- generated xml file: /tmp/v13/python-app/junit-collect.xml -----------
+=========================== short test summary info ============================
+ERROR tests/test_collect.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+=============================== 1 error in 0.07s ===============================

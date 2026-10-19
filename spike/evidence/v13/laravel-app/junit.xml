@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Tests\Unit\RedTest" file="tests/Unit/RedTest.php" tests="3" assertions="1" errors="2" failures="1" skipped="0" time="0.007319">
+    <testcase name="it AC-9: assertion failure" file="tests/Unit/RedTest.php::it AC-9: assertion failure" class="Tests\Unit\RedTest" classname="Tests.Unit.RedTest" assertions="1" time="0.006793">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">it AC-9: assertion failureFailed asserting that 2 is identical to 3.
+at tests/Unit/RedTest.php:2</failure>
+    </testcase>
+    <testcase name="it AC-8: missing class" file="tests/Unit/RedTest.php::it AC-8: missing class" class="Tests\Unit\RedTest" classname="Tests.Unit.RedTest" assertions="0" time="0.000304">
+      <error type="Error">it AC-8: missing classError: Class "App\Actions\DoesNotExist" not found
+at tests/Unit/RedTest.php:3</error>
+    </testcase>
+    <testcase name="it AC-7: undefined method" file="tests/Unit/RedTest.php::it AC-7: undefined method" class="Tests\Unit\RedTest" classname="Tests.Unit.RedTest" assertions="0" time="0.000222">
+      <error type="Error">it AC-7: undefined methodError: Call to undefined method App\Actions\CountWords::nope()
+at tests/Unit/RedTest.php:4</error>
+    </testcase>
+  </testsuite>
+</testsuites>

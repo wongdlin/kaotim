@@ -1,0 +1,6 @@
+---
+description: Kaotim spike glob-scoped rule probe
+globs: "**/*.kspike"
+alwaysApply: false
+---
+Token: RULE-GLOB-OK (attached only when a *.kspike file is in context).

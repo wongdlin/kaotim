@@ -1,0 +1,11 @@
+
+An error occurred inside PHPUnit.
+Message: syntax error, unexpected token "}"
+Location: /tmp/tmp.WekjtSC0D5/tests/Unit/SyntaxTest.php:2
+#0 /tmp/tmp.WekjtSC0D5/vendor/phpunit/phpunit/src/Runner/TestSuiteLoader.php(49): PHPUnit\Runner\TestSuiteLoader->loadSuiteClassFile()
+#1 /tmp/tmp.WekjtSC0D5/vendor/phpunit/phpunit/src/TextUI/Configuration/TestSuiteBuilder.php(119): PHPUnit\Runner\TestSuiteLoader->load()
+#2 /tmp/tmp.WekjtSC0D5/vendor/phpunit/phpunit/src/TextUI/Configuration/TestSuiteBuilder.php(58): PHPUnit\TextUI\Configuration\TestSuiteBuilder->testSuiteFromPath()
+#3 /tmp/tmp.WekjtSC0D5/vendor/phpunit/phpunit/src/TextUI/Application.php(386): PHPUnit\TextUI\Configuration\TestSuiteBuilder->build()
+#4 /tmp/tmp.WekjtSC0D5/vendor/phpunit/phpunit/src/TextUI/Application.php(195): PHPUnit\TextUI\Application->buildTestSuite()
+#5 /tmp/tmp.WekjtSC0D5/vendor/phpunit/phpunit/phpunit(104): PHPUnit\TextUI\Application->run()
+#6 {main}

@@ -1,0 +1,30 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-9.1.1, pluggy-1.7.0
+rootdir: /tmp/tmp.PA1dByO63d
+configfile: pyproject.toml
+collected 2 items
+
+tests/test_red.py FF                                                     [100%]
+
+=================================== FAILURES ===================================
+_________________________ test_ac_9_assertion_failure __________________________
+
+    def test_ac_9_assertion_failure() -> None:
+>       assert count_words("a b") == 3
+E       AssertionError: assert 2 == 3
+E        +  where 2 = count_words('a b')
+
+tests/test_red.py:4: AssertionError
+___________________________ test_ac_8_missing_symbol ___________________________
+
+    def test_ac_8_missing_symbol() -> None:
+>       from app.services.words import count_chars  # not implemented yet
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ImportError: cannot import name 'count_chars' from 'app.services.words' (/tmp/tmp.PA1dByO63d/src/app/services/words.py)
+
+tests/test_red.py:7: ImportError
+-------------- generated xml file: /tmp/v13/python-app/junit.xml ---------------
+=========================== short test summary info ============================
+FAILED tests/test_red.py::test_ac_9_assertion_failure - AssertionError: asser...
+FAILED tests/test_red.py::test_ac_8_missing_symbol - ImportError: cannot impo...
+============================== 2 failed in 0.03s ===============================

@@ -1,0 +1,3 @@
+exit(pao)=2
+exit(plain)=2
+exit(syntax)=255
