@@ -1,0 +1,6 @@
+---
+description: Keep changes minimal and scoped
+alwaysApply: true
+---
+
+Touch only owned paths. No unrelated formatting. Prefer smallest fix that meets AC.

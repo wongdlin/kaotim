@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "matcher": "Write|Delete|StrReplace",
+        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook preToolUse"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook beforeShellExecution"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook afterFileEdit"
+      }
+    ],
+    "stop": [
+      {
+        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook stop"
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook subagentStart"
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 # Kaotim plugin defaults (spec §4.5). A repo can override any key in .kaotim/config.yaml.
-# Status: M0 draft. Values marked "unverified" must be confirmed (docs/platform-findings.md).
+# Runtime: Python 3.9+ via scripts/kaotim.py (D16). Windows: ensure `python` or `py -3` on PATH.
 
 caps:
   green_attempts: 5

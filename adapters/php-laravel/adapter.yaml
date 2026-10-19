@@ -1,0 +1,7 @@
+# Built-in adapter metadata mirror (engine code is authoritative).
+adapter_version: 1
+id: php-laravel
+kind: builtin
+capabilities:
+  verify_red: structured
+  check_layers: full

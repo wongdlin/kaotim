@@ -1,0 +1,1 @@
+yaml_lite.py is original Kaotim code (stdlib only). All rights reserved with the Kaotim project.

@@ -1,0 +1,11 @@
+---
+description: Core Kaotim engineering principles
+alwaysApply: true
+---
+
+- SOLID, DRY (rule of three), KISS, YAGNI.
+- Minimal diffs; no drive-by refactors.
+- No new dependencies without asking.
+- No secrets in code or logs.
+- Search reuse before inventing helpers.
+- Scripts decide stage completion; do not improvise state.

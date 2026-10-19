@@ -3,7 +3,10 @@
 .kaotim/gates/
 .kaotim/worktrees/
 .kaotim/metrics/*.jsonl
+.kaotim/metrics/*.lock
 .kaotim/state.json
 # Spike output
 .kaotim-spike/
 __pycache__/
+*.pyc
+.pytest_cache/

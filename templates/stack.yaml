@@ -1,0 +1,11 @@
+version: 1
+git:
+  base_branch: main
+  commit_convention: conventional
+  pr_cli: gh
+conventions:
+  notes: "Review and commit after /kaotim-stack."
+packages:
+  - name: default
+    path: "."
+    stacks: []

@@ -417,7 +417,9 @@ an installed Python" in the user guide. If native Windows with Herd must work wi
 install, Node (no dependencies, JSON config) is the alternative, at the cost of the YAML config the
 spec assumes. Question Q1.
 
-**Decided fallback.** Unchanged: Python 3.9+ stdlib until the user answers Q1.
+**Decided fallback.** **User chose Python** (2026-10-19): keep Python 3.9+ stdlib + vendored YAML
+(`scripts/kaotim.py`). Native Windows must install Python (or use `py -3`); Node was considered and
+rejected by the user after an earlier plan draft.
 
 ## V11. Git worktrees for parallel subagents
 

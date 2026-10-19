@@ -1,0 +1,6 @@
+---
+description: Enforce test-first and locked tests
+alwaysApply: false
+---
+
+When writing features or tests: tests first; assert behavior; never edit locked tests to pass; `verify-red` must be assertion failures.

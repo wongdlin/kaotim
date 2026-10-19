@@ -1,0 +1,11 @@
+{
+  "agent": "feature-dev",
+  "task": "T1",
+  "attempt": 1,
+  "status": "done",
+  "changed": [],
+  "summary": "Max 3 short lines.",
+  "findings": [],
+  "question": null,
+  "details": null
+}

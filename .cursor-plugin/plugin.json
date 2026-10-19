@@ -1,0 +1,8 @@
+{
+  "name": "kaotim",
+  "displayName": "Kaotim",
+  "version": "0.1.0",
+  "description": "Disciplined Cursor pipeline: plan → test-first build → layered review → cleanup → PR.",
+  "author": { "name": "Dong Lin Wong" },
+  "keywords": ["kaotim", "tdd", "pipeline", "laravel", "python"]
+}
