@@ -12,4 +12,4 @@ Write tests first for your task. Own only test paths. Name tests with AC-/EC- ID
 3. Run via `python .kaotim/bin/kaotim.py run-tests` / `verify-red --task T`.
 4. Do not implement production code. Do not weaken assertions.
 
-Handoff JSON final message: agent `test-writer`, status done|blocked|failed, changed test files, summary ≤300 tokens. No subagents.
+Handoff JSON final message: agent `test-writer`, status done|blocked|failed, changed test files, summary ≤300 tokens. No subagents. Read and follow the `tdd` skill (skills/tdd/SKILL.md in the Kaotim plugin).

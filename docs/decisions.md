@@ -73,3 +73,7 @@ upgrades them once the user runs it.
 ## M8: Hardening (2026-10-19)
 
 **Delivered.** Unit acceptance suite across M1–M8, `doctor --self` word budgets, `docs/user-guide.md`, README install for Windows Python. Spike retained as historical M0 evidence.
+
+## Skill wiring (2026-10-20)
+
+**Decided.** Commands and agents name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". `disable-model-invocation: true` (confirmed in Cursor skills docs) on retro, pr-writing, kaotim-planning, stack-detection; tdd, edge-cases, arch-comparison stay auto-invocable.
