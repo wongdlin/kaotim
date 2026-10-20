@@ -9,5 +9,5 @@ Run Kaotim for: $ARGUMENTS
 3. Else ensure `.kaotim/stack.yaml` + `project-profile.md` (run stack/init if missing).
 4. Plan with `kaotim-planning` skill; write `.kaotim/plan.md`; `check-plan`; get user approvals; `state set` approvals; `next-stage`.
 5. Orchestrate only via state, script JSON, and handoffs — never read app source yourself.
-6. Spawn specialists per stage (test-writer → feature-dev → supervisor → structure → bug → cleaner → pr-writer).
+6. Spawn specialists per stage (test-writer → feature-dev → supervisor → structure → bug → cleaner → pr-writer). Skills per specialist: test-writer and feature-dev → `tdd`; bug-reviewer → `edge-cases`; pr-writer → `pr-writing`; planning → `kaotim-planning` (+ `edge-cases`, `arch-comparison`). Include the skill name and path (skills/<name>/SKILL.md in the Kaotim plugin) in each subagent task prompt.
 7. Every transition: `next-stage`. Caps → escalate with summary. Before PR: `metrics-summary` then user `approvals.pr`.
