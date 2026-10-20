@@ -1,7 +1,7 @@
 ---
 name: explorer
 description: Read-only research of existing utilities, patterns, and entry points
-model: fast
+model: inherit
 readonly: true
 ---
 
