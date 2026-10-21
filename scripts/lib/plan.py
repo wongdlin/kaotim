@@ -46,8 +46,9 @@ def _table_rows(section: str) -> list[dict[str, str]]:
 
 
 def _section(body: str, number: str, title_hint: str) -> str:
+    # title_hint may appear anywhere after the number (e.g. "7. E — Execution Units")
     pat = re.compile(
-        rf"^##\s+{number}\.\s+{title_hint}.*?\n(.*?)(?=^##\s+\d+\.|\Z)",
+        rf"^##\s+{number}\.\s+[^\n]*{re.escape(title_hint)}[^\n]*\n(.*?)(?=^##\s+\d+\.|\Z)",
         re.MULTILINE | re.DOTALL | re.IGNORECASE,
     )
     m = pat.search(body)
@@ -56,14 +57,28 @@ def _section(body: str, number: str, title_hint: str) -> str:
 
 def parse_plan(text: str) -> dict[str, Any]:
     meta, body = parse_frontmatter(text)
+    goal_sec = _section(body, "1", "Goal") or _section(body, "1", "Purpose")
+    io_sec = _section(body, "2", "Inputs")
     ac_sec = _section(body, "3", "Acceptance")
     ec_sec = _section(body, "4", "Edge")
-    arch_sec = _section(body, "5", "Architecture")
-    tasks_sec = _section(body, "6", "Tasks")
-    open_sec = _section(body, "9", "Open")
+    # S — Scope & Constraints (legacy: ## 5. Architecture)
+    scope_sec = _section(body, "5", "Scope") or _section(body, "5", "Architecture")
+    shapes_sec = _section(body, "6", "Precision") or _section(body, "6", "P")
+    # E — Execution Units (legacy: ## 6. Tasks)
+    tasks_sec = (
+        _section(body, "7", "Execution")
+        or _section(body, "7", "Tasks")
+        or _section(body, "6", "Tasks")
+    )
+    cp_sec = _section(body, "8", "Checkpoints") or _section(body, "8", "C")
+    open_sec = (
+        _section(body, "11", "Open")
+        or _section(body, "9", "Open")
+    )
 
     ac_rows = _table_rows(ac_sec)
     ec_rows = _table_rows(ec_sec)
+    cp_rows = _table_rows(cp_sec)
 
     tasks: dict[str, dict[str, Any]] = {}
     for m in TASK_HEADER_RE.finditer(tasks_sec):
@@ -74,20 +89,22 @@ def parse_plan(text: str) -> dict[str, Any]:
         owns = _field(block, "Owns files")
         depends = _field(block, "Depends on")
         covers = _field(block, "Covers")
+        done_when = _field(block, "Done when")
         tasks[tid] = {
             "id": tid,
             "name": name,
             "owns": _split_list(owns),
             "depends_on": _split_list(depends),
             "covers": _split_list(covers),
+            "done_when": done_when,
             "raw": block,
         }
 
     comparison_required = bool(
-        re.search(r"Comparison required:\s*yes", arch_sec, re.IGNORECASE)
+        re.search(r"Comparison required:\s*yes", scope_sec, re.IGNORECASE)
     )
     chosen = None
-    cm = re.search(r"Chosen:\s*(.+)", arch_sec, re.IGNORECASE)
+    cm = re.search(r"Chosen:\s*(.+)", scope_sec, re.IGNORECASE)
     if cm:
         chosen = cm.group(1).strip()
 
@@ -100,13 +117,17 @@ def parse_plan(text: str) -> dict[str, Any]:
 
     return {
         "meta": meta,
+        "goal": goal_sec,
+        "inputs_outputs": io_sec,
         "acceptance": ac_rows,
         "edge_cases": ec_rows,
+        "checkpoints": cp_rows,
+        "precision_shapes": shapes_sec,
         "tasks": tasks,
         "architecture": {
             "comparison_required": comparison_required,
             "chosen": chosen,
-            "section": arch_sec,
+            "section": scope_sec,
         },
         "blocking_questions": blocking_questions,
         "body": body,
@@ -135,6 +156,18 @@ def check_plan(repo: Path | None = None) -> dict[str, Any]:
     meta = parsed["meta"]
     status = (meta.get("status") or "draft").lower()
     tasks = parsed["tasks"]
+
+    # Goal / Done when (SPEC entry)
+    goal = parsed.get("goal") or ""
+    if not re.search(r"Done when:\s*\S", goal, re.IGNORECASE):
+        errors.append("Goal missing Done when")
+
+    # Inputs / outputs
+    io = parsed.get("inputs_outputs") or ""
+    if not re.search(r"Inputs:\s*\S", io, re.IGNORECASE):
+        errors.append("Inputs and outputs missing Inputs")
+    if not re.search(r"Outputs:\s*\S", io, re.IGNORECASE):
+        errors.append("Inputs and outputs missing Outputs")
 
     # AC mapping
     for row in parsed["acceptance"]:
@@ -172,6 +205,35 @@ def check_plan(repo: Path | None = None) -> dict[str, Any]:
             errors.append(f"{eid} missing Decision")
         if not task or task not in tasks:
             errors.append(f"{eid} not mapped to exactly one task")
+
+    # C — Checkpoints & Tests: at least one; each maps to a task
+    checkpoints = parsed.get("checkpoints") or []
+    if not checkpoints:
+        errors.append("Checkpoints & Tests missing (need at least one CP)")
+    for row in checkpoints:
+        cid = row.get("ID") or row.get("Id") or row.get("id")
+        verify = (
+            row.get("Command or assertion")
+            or row.get("Verify")
+            or row.get("verify")
+            or row.get("Command")
+            or ""
+        )
+        task = row.get("Task") or row.get("task")
+        if not cid:
+            errors.append(f"CP row missing ID: {row}")
+            continue
+        if not verify or verify.lower() in {"", "tbd", "?", "-"}:
+            errors.append(f"{cid} missing Command or assertion")
+        if not task or task not in tasks:
+            errors.append(f"{cid} not mapped to exactly one task")
+
+    # Tasks should declare Done when (maps to AC)
+    for tid, t in tasks.items():
+        if tid == "C0":
+            continue
+        if not (t.get("done_when") or "").strip():
+            warnings.append(f"{tid} missing Done when")
 
     # ownership overlap
     task_ids = list(tasks.keys())
@@ -260,5 +322,6 @@ def check_plan(repo: Path | None = None) -> dict[str, Any]:
             "tasks": list(tasks.keys()),
             "ac_count": len(parsed["acceptance"]),
             "ec_count": len(parsed["edge_cases"]),
+            "cp_count": len(parsed.get("checkpoints") or []),
         },
     }

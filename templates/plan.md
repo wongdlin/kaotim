@@ -7,14 +7,15 @@ created: YYYY-MM-DD
 fast_lane: false
 ---
 
-## 1. Purpose
+## 1. Goal
 - **What:**
 - **Why now:**
-- **Expected outcome:**
+- **Done when:**
 
-## 2. Scope
-- **In:**
-- **Non-goals:**
+## 2. Inputs and outputs
+- **Inputs:**
+- **Outputs:**
+- **Side effects:**
 
 ## 3. Acceptance criteria
 | ID | Criterion | Task |
@@ -24,26 +25,43 @@ fast_lane: false
 ## 4. Edge cases
 | ID | Scenario | Options | Decision | Task |
 |---|---|---|---|---|
-| EC-1 | | A / B | | T1 |
+| EC-1 | | a / b / c | | T1 |
 
-## 5. Architecture
+## 5. S — Scope & Constraints
+- **In:**
+- **Non-goals:**
+- **Locked decisions:**
+- **Architectural boundaries:**
+- **Forbidden patterns:**
 - **Comparison required:** no
 - **Chosen:**
 - **Rejected:**
+
+## 6. P — Precision Shapes
+- **Schemas / DTOs:**
+- **Enums / constants:**
+- **Migrations:**
+- **File paths:**
 - **Contracts:**
 
-## 6. Tasks
+## 7. E — Execution Units
 ### T1: <name>
 - Depends on: none
 - Owns files: path/**
 - Covers: AC-1, EC-1
 - Reuse:
+- Done when: AC-1
 
-## 7. Risks and rollout
+## 8. C — Checkpoints & Tests
+| ID | Verify | Command or assertion | Task |
+|---|---|---|---|
+| CP-1 | | | T1 |
+
+## 9. Risks and rollout
 -
 
-## 8. Decision log
+## 10. Decision log
 -
 
-## 9. Open questions
+## 11. Open questions
 - None (Blocking: no)

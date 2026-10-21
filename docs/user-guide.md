@@ -28,7 +28,7 @@ Review `.kaotim/stack.yaml` and `.kaotim/project-profile.md`, then commit them.
 ## 4. Everyday workflow
 
 1. `/kaotim <request>` or `/kaotim-plan <request>`
-2. Answer planning questions; approve the plan
+2. Answer planning questions (goal/AC, I/O, SPEC S→P→E→C; lettered tables; ask until clear); approve the plan
 3. Pipeline runs TDD, reviews, cleanup
 4. Read metrics summary; approve PR creation
 

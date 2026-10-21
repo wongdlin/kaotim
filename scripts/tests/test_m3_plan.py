@@ -31,14 +31,15 @@ created: 2026-10-19
 fast_lane: false
 ---
 
-## 1. Purpose
+## 1. Goal
 - **What:** demo
 - **Why now:** test
-- **Expected outcome:** ok
+- **Done when:** AC-1 passes
 
-## 2. Scope
-- **In:** x
-- **Non-goals:** y
+## 2. Inputs and outputs
+- **Inputs:** request payload
+- **Outputs:** response body
+- **Side effects:** none
 
 ## 3. Acceptance criteria
 | ID | Criterion | Task |
@@ -48,28 +49,45 @@ fast_lane: false
 ## 4. Edge cases
 | ID | Scenario | Options | Decision | Task |
 |---|---|---|---|---|
-| EC-1 | empty | A / B | A | T1 |
+| EC-1 | empty | a / b / c | a | T1 |
 
-## 5. Architecture
+## 5. S — Scope & Constraints
+- **In:** x
+- **Non-goals:** y
+- **Locked decisions:** none
+- **Architectural boundaries:** app/Actions
+- **Forbidden patterns:** none
 - **Comparison required:** no
 - **Chosen:** simple
 - **Rejected:**
-- **Contracts:**
 
-## 6. Tasks
+## 6. P — Precision Shapes
+- **Schemas / DTOs:** none
+- **Enums / constants:** none
+- **Migrations:** none
+- **File paths:** app/Actions/**
+- **Contracts:** none
+
+## 7. E — Execution Units
 ### T1: impl
 - Depends on: none
 - Owns files: app/Actions/**
 - Covers: AC-1, EC-1
 - Reuse: none
+- Done when: AC-1
 
-## 7. Risks and rollout
+## 8. C — Checkpoints & Tests
+| ID | Verify | Command or assertion | Task |
+|---|---|---|---|
+| CP-1 | unit | php artisan test --filter=Demo | T1 |
+
+## 9. Risks and rollout
 - none
 
-## 8. Decision log
+## 10. Decision log
 - chose simple
 
-## 9. Open questions
+## 11. Open questions
 - None
 """
 
@@ -106,7 +124,7 @@ packages:
         self.assertEqual(r.returncode, 0, r.stdout)
 
     def test_check_plan_missing_decision(self) -> None:
-        bad = GOOD_PLAN.replace("| A | T1 |", "| TBD | T1 |")
+        bad = GOOD_PLAN.replace("| a | T1 |", "| TBD | T1 |", 1)
         (self.repo / ".kaotim" / "plan.md").write_text(bad, encoding="utf-8")
         r = run_cli(["check-plan"], self.repo)
         self.assertEqual(r.returncode, 1)

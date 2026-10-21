@@ -6,7 +6,6 @@ caps:
   supervisor_rejects: 3
   structure_refactors: 2
   bug_fix_rounds: 2
-  question_rounds: 3
 
 parallel:
   max_agents: 4                 # V4: no documented limit; unverified
