@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from .config import load_config
 from .paths import kaotim_dir
 from .plan import check_plan
 from .stack import load_stack
@@ -83,6 +84,12 @@ def evaluate(repo: Path | None = None) -> dict[str, Any]:
             lock = t.get("test_lock") or {}
             if not (lock.get("files") or lock):
                 reasons.append(f"{tid} missing test_lock")
+        cfg = load_config(repo)
+        require_tests = (cfg.get("approvals") or {}).get("require_tests", True)
+        if require_tests:
+            approvals = state.get("approvals") or {}
+            if not approvals.get("tests"):
+                reasons.append("approvals.tests timestamp required")
         nxt = "tdd_green"
     elif stage == "tdd_green":
         tasks = state.get("tasks") or {}

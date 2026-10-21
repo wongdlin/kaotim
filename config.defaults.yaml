@@ -7,6 +7,9 @@ caps:
   structure_refactors: 2
   bug_fix_rounds: 2
 
+approvals:
+  require_tests: true           # human gate after tdd_red before feature-dev
+
 parallel:
   max_agents: 4                 # V4: no documented limit; unverified
 

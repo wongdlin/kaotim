@@ -29,8 +29,9 @@ Review `.kaotim/stack.yaml` and `.kaotim/project-profile.md`, then commit them.
 
 1. `/kaotim <request>` or `/kaotim-plan <request>`
 2. Answer planning questions (goal/AC, I/O, SPEC S→P→E→C; clickable AskQuestion when available; ask until clear); approve the plan
-3. Pipeline runs TDD, reviews, cleanup
-4. Read metrics summary; approve PR creation
+3. After failing tests are written and locked, review them (assertions, coverage gaps); approve tests to start implementation (disable with `approvals.require_tests: false` in `.kaotim/config.yaml`)
+4. Pipeline continues TDD green, reviews, cleanup
+5. Read metrics summary; approve PR creation
 
 CLI used throughout: `python .kaotim/bin/kaotim.py <subcommand>` after init.
 
@@ -50,7 +51,7 @@ CLI used throughout: `python .kaotim/bin/kaotim.py <subcommand>` after init.
 
 ## 6. When it stops
 
-Human checkpoints: planning, escalations (caps), PR approval after metrics. Fast lane requires explicit confirmation and stays within file limits.
+Human checkpoints: planning, test approval after `tdd_red` (default on), escalations (caps), PR approval after metrics. Fast lane requires explicit confirmation and stays within file limits.
 
 ## 7. What lives where
 

@@ -64,7 +64,7 @@ def default_state(plan_id: str = "PLAN-001", package: str = "default") -> dict[s
         "stage": "recon",
         "stage_status": "in_progress",
         "fast_lane": False,
-        "approvals": {"plan": None, "architecture": None, "pr": None},
+        "approvals": {"plan": None, "architecture": None, "tests": None, "pr": None},
         "tasks": {},
         "loops": {
             "supervisor_rejects": 0,

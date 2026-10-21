@@ -48,6 +48,7 @@ See the state machine and agent roster in earlier design notes; commands live in
 | `/kaotim <request>` | Full pipeline (or resume) |
 | `/kaotim-plan <request>` | Planning only |
 | `/kaotim-resume` | Continue from `state.json` |
+| `/kaotim-explain` | Explain selected code in precise, simple terms |
 | `/kaotim-stack` | Generate `.kaotim/stack.yaml` |
 | `/kaotim-init` | Copy CLI, stack draft, profile |
 | `/kaotim-doctor` | Validate wiring and safety |
@@ -56,6 +57,19 @@ See the state machine and agent roster in earlier design notes; commands live in
 | `/kaotim-retro` | Improvement proposals from history |
 
 CLI: `python scripts/kaotim.py <subcommand>` (after init: `python .kaotim/bin/kaotim.py`).
+
+### Skills
+
+| Skill | Used for |
+|---|---|
+| `kaotim-planning` | Plan / SPEC / approvals |
+| `tdd` | Red → lock → green |
+| `edge-cases` | EC enumeration and bug review |
+| `arch-comparison` | Architecture options during planning |
+| `pr-writing` | PR title/body from plan + gates |
+| `stack-detection` | Infer stack for `stack.yaml` |
+| `retro` | Improvement proposals from history |
+| `explain-code` | Precise plain-language walkthrough of selected code |
 
 ## Supported stacks
 
