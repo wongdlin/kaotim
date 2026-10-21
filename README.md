@@ -1,5 +1,9 @@
 # Kaotim
 
+<p align="center">
+  <img src="assets/logo.png" alt="Kaotim" width="420" />
+</p>
+
 > *kautim* (Malaysian slang): settled, sorted, done.
 
 **Kaotim is a Cursor plugin that turns an AI coding agent into a disciplined engineering pipeline:
@@ -94,6 +98,7 @@ py -3 -m unittest discover -s scripts/tests -p "test_*.py"
 | Path | Status | Contents |
 |---|---|---|
 | `.cursor-plugin/plugin.json` | present | Plugin manifest |
+| `assets/logo.png` | present | Plugin / marketplace logo |
 | `scripts/kaotim.py`, `scripts/lib/` | present | CLI and libraries (Python) |
 | `commands/`, `agents/`, `skills/`, `rules/` | present | Slash commands, subagents, skills, rules |
 | `hooks/hooks.json` | present | Test-lock, shell guard, stage-guard |

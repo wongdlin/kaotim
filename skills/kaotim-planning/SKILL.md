@@ -6,4 +6,4 @@ disable-model-invocation: true
 
 Produce `.kaotim/plan.md` from `templates/plan.md`.
 
-Rules: ask, never assume. Batch questions (respect `caps.question_rounds`). Every AC/EC maps to one task. EC needs Decision; use the `edge-cases` skill for each EC. Record architecture Chosen if comparison required, using the `arch-comparison` skill. Disjoint owns. No blocking questions when approving. Use explorer for reuse. Fast lane only with user confirm and limits.
+Rules: ask, never assume. Batch questions (respect `caps.question_rounds`). Every AC/EC maps to one task. EC needs Decision; use the `edge-cases` skill for each EC. Record architecture Chosen if comparison required, using the `arch-comparison` skill. Disjoint owns. No blocking questions when approving. Prefer Grep/Glob/Read for reuse; spawn `explorer` only for broad unknown areas. Never stall planning on a silent subagent — cancel and continue. Fast lane only with user confirm and limits.
