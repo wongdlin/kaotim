@@ -42,6 +42,8 @@ CLI used throughout: `python .kaotim/bin/kaotim.py <subcommand>` after init.
 | `/kaotim` | Full pipeline |
 | `/kaotim-plan` | Planning only |
 | `/kaotim-resume` | Resume from `state.json` |
+| `/kaotim-explain` | Explain selected code |
+| `/kaotim-tree` | Call-flow tree of selected code |
 | `/kaotim-stack` | Generate stack.yaml |
 | `/kaotim-init` | Bin copy + stack + profile |
 | `/kaotim-doctor` | Validate wiring |

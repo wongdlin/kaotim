@@ -49,6 +49,7 @@ See the state machine and agent roster in earlier design notes; commands live in
 | `/kaotim-plan <request>` | Planning only |
 | `/kaotim-resume` | Continue from `state.json` |
 | `/kaotim-explain` | Explain selected code in precise, simple terms |
+| `/kaotim-tree` | Call-flow tree of selected code (upstream + 1 downstream) |
 | `/kaotim-stack` | Generate `.kaotim/stack.yaml` |
 | `/kaotim-init` | Copy CLI, stack draft, profile |
 | `/kaotim-doctor` | Validate wiring and safety |
@@ -70,6 +71,7 @@ CLI: `python scripts/kaotim.py <subcommand>` (after init: `python .kaotim/bin/ka
 | `stack-detection` | Infer stack for `stack.yaml` |
 | `retro` | Improvement proposals from history |
 | `explain-code` | Precise plain-language walkthrough of selected code |
+| `kaotim-tree` | Call-flow tree: all upstream, one downstream, snippets/branches |
 
 ## Supported stacks
 
