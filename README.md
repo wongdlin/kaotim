@@ -7,11 +7,14 @@
 > *kautim* (Malaysian slang): settled, sorted, done.
 
 **Kaotim is a Cursor plugin that turns an AI coding agent into a disciplined engineering pipeline:
-plan → test-first build → layered review → cleanup → pull request.** A main orchestrator agent
-talks to you and delegates to ten specialist subagents, while deterministic Python scripts, not
-LLM opinion, decide when each stage is done.
+plan → test-first build → structure review → cleanup → pull request.** A main orchestrator
+talks to you and delegates to specialist subagents, while a small Python CLI — not LLM opinion —
+decides when each stage is done.
 
-> **Status:** M0–M8 implemented (v0.1.0). Install locally and run `/kaotim-init` in a target repo.
+It is **language-agnostic**: you point Kaotim at your repo’s real test/lint commands in
+`.kaotim/config.yaml`. There are no built-in language adapters or `stack.yaml`.
+
+> **Status:** Pipeline M0–M8 + generic config pivot. Install locally and run `/kaotim-init`.
 
 ---
 
@@ -24,8 +27,7 @@ declares victory without evidence. Kaotim answers with **structure plus enforcem
 ## How it works
 
 Hub-and-spoke orchestration; shared memory under `.kaotim/`; scripts decide stage transitions.
-See the state machine and agent roster in earlier design notes; slash entry points are skills
-under `skills/` (type `/` in Agent chat).
+Slash entry points are skills under `skills/` (type `/` in Agent chat).
 
 ### Specialist subagents
 
@@ -35,7 +37,7 @@ under `skills/` (type `/` in Agent chat).
 | `test-writer` | tests only | Write failing tests per AC/EC |
 | `feature-dev` | write (owned files) | Make locked tests pass |
 | `supervisor` | read-only | Check acceptance criteria |
-| `structure-reviewer` | read-only | Flag layering/structure issues |
+| `structure-reviewer` | read-only | Flag structure issues vs repo rules |
 | `refactorer` | write | Behaviour-preserving structure fixes |
 | `bug-reviewer` | read-only | Find bugs by severity |
 | `fixer` | write | Fix bugs with regression tests |
@@ -54,10 +56,9 @@ Type `/` in Agent chat and pick a skill. Entry skills are slash-only except `kao
 | `/kaotim-resume` | Continue from `state.json` |
 | `/kaotim-explain` | Explain selected code in precise, simple terms |
 | `/kaotim-tree` | Call-flow tree of selected code (upstream + 1 downstream) |
-| `/kaotim-stack` | Generate `.kaotim/stack.yaml` |
-| `/kaotim-init` | Copy CLI, stack draft, profile |
+| `/kaotim-init` | Copy CLI, config stub, profile |
 | `/kaotim-doctor` | Validate wiring and safety |
-| `/kaotim-refresh` | Propose updates (diff only) |
+| `/kaotim-refresh` | Propose config/profile updates (diff only) |
 | `/kaotim-metrics` | Metrics summary / trends |
 | `/kaotim-retro` | Improvement proposals from history |
 
@@ -72,19 +73,33 @@ CLI: `python scripts/kaotim.py <subcommand>` (after init: `python .kaotim/bin/ka
 | `arch-comparison` | Architecture options during planning |
 | `pr-writing` | PR title/body from plan + gates |
 
-## Supported stacks
+## Configure your repo
 
-| Stack | Support |
-|---|---|
-| **PHP / Laravel** (`php-laravel`) | Built-in: Pest/PHPUnit JUnit, wrong-reason detection, layers, guards |
-| **Python** (`python`) | Built-in: pytest JUnit, ruff/mypy defaults, layers |
-| Anything else | Declarative adapter or commands-only |
+After `/kaotim-init`, edit `.kaotim/config.yaml`:
+
+```yaml
+git:
+  base_branch: main
+  pr_cli: gh          # or glab / none
+
+commands:
+  test: "npm test"    # required after plan approve, before TDD
+  test_file: ""       # optional; {file} / {files}
+  lint: ""
+  typecheck: ""
+  build: ""
+  worktree_setup: ""
+  junit_flag: ""      # optional; e.g. --junitxml={path}
+```
+
+Put architecture / layering conventions in **`.cursor/rules/`** or **`rules/`**. Structure review
+is agent-enforced (structure-reviewer reads those files via `list-rules`).
 
 ## Requirements
 
 - Cursor with plugin support
 - **Python 3.9+** on `PATH` (`python` on Windows, `python3` on macOS/Linux)
-- Git; safe local test database
+- Git; safe local test database when your suite needs one
 - Optional: `gh` / `glab` for draft PRs
 
 ## Install for local development
@@ -110,33 +125,20 @@ py -3 -m unittest discover -s scripts/tests -p "test_*.py"
 
 ## Repository layout
 
-| Path | Status | Contents |
-|---|---|---|
-| `.cursor-plugin/plugin.json` | present | Plugin manifest |
-| `assets/logo.png` | present | Plugin / marketplace logo |
-| `scripts/kaotim.py`, `scripts/lib/` | present | CLI and libraries (Python) |
-| `agents/`, `skills/`, `rules/` | present | Subagents, slash/supporting skills, rules |
-| `hooks/hooks.json` | present | Test-lock, shell guard, stage-guard |
-| `adapters/`, `templates/` | present | Ecosystem adapters, templates |
-| `config.defaults.yaml` | present | Caps, budgets, model tiers |
-| `fixtures/` | present | Laravel (Pest/PHPUnit), Python |
-| `docs/` | present | Findings, decisions, user guide |
-
-## Roadmap
-
-- [x] **M0 – Platform spikes** (findings in docs; spike tree removed)
-- [x] **M1 – Foundations** (Python CLI)
-- [x] **M2 – Stack generation**
-- [x] **M3 – Planning**
-- [x] **M4 – Single-task TDD**
-- [x] **M5 – Multi-task & integration**
-- [x] **M6 – Review chain**
-- [x] **M7 – PR, metrics, resume, fast lane**
-- [x] **M8 – Hardening**
+| Path | Contents |
+|---|---|
+| `.cursor-plugin/plugin.json` | Plugin manifest |
+| `assets/logo.png` | Plugin / marketplace logo |
+| `scripts/kaotim.py`, `scripts/lib/` | CLI and libraries (Python) |
+| `agents/`, `skills/`, `rules/` | Subagents, slash/supporting skills, plugin rules |
+| `hooks/hooks.json` | Test-lock, shell guard, stage-guard |
+| `templates/` | Plan and related templates |
+| `config.defaults.yaml` | Caps, budgets, model tiers, empty `commands.*` |
+| `docs/` | Findings, decisions, user guide |
 
 ## Docs
 
-- [User guide](docs/user-guide.md)
+- [User guide](docs/user-guide.md) — how to use Kaotim day to day
 - [Decisions](docs/decisions.md)
 - [Platform findings](docs/platform-findings.md)
 

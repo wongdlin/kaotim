@@ -1,5 +1,5 @@
-# Kaotim plugin defaults (spec §4.5). A repo can override any key in .kaotim/config.yaml.
-# Runtime: Python 3.9+ via scripts/kaotim.py (D16). Windows: ensure `python` or `py -3` on PATH.
+# Kaotim plugin defaults. A repo overrides any key in .kaotim/config.yaml.
+# Runtime: Python 3.9+ via scripts/kaotim.py. Windows: ensure `python` or `py -3` on PATH.
 
 caps:
   green_attempts: 5
@@ -11,30 +11,42 @@ approvals:
   require_tests: true           # human gate after tdd_red before feature-dev
 
 parallel:
-  max_agents: 4                 # V4: no documented limit; unverified
+  max_agents: 4
 
-# Model tiers (spec §8.1, §14.9). Each value becomes the `model:` frontmatter of the agents in
-# that tier. Allowed values (V2): "inherit" (the parent chat's model) or a Cursor model ID,
-# optionally with options in brackets, e.g. "claude-opus-5[effort=high]".
-# "fast" is used by Cursor's own plugins but is not documented (docs-only).
-# Real IDs depend on the user's plan: run `agent models` and confirm (open question Q5).
+# Model tiers. Each value becomes the `model:` frontmatter of the agents in that tier.
 tiers:
   strong: inherit               # supervisor, bug-reviewer
   standard: inherit             # test-writer, feature-dev, structure-reviewer, refactorer, fixer
   fast: fast                    # explorer, cleaner, pr-writer
 
-# Price per million tokens, keyed by the model slug reported in hook payloads (`model`).
-# Used only for the estimated cost line in the metrics summary. Fill from
-# https://cursor.com/docs/models-and-pricing (prices change; keep in the repo config).
 prices: {}
-#   composer-2.5: { input: 0.5, output: 2.5 }
 
 review:
-  bug_severity_block: medium    # findings at or above this must be resolved
+  bug_severity_block: medium
 
-budgets:                        # soft token budgets per stage; warn on exceed
+budgets:
   orchestrator_per_stage: 15000
   subagent_default: 40000
 
 fast_lane:
   max_files: 3
+
+git:
+  base_branch: main
+  commit_convention: conventional
+  pr_cli: gh
+
+# Shell commands the CLI runs for gates / worktrees. Fill in the target repo's .kaotim/config.yaml.
+# `test` must be non-empty after plan approve, before tdd_red.
+commands:
+  test: ""
+  test_file: ""                 # optional; supports {file} / {files}
+  lint: ""
+  typecheck: ""
+  build: ""
+  worktree_setup: ""
+  junit_flag: ""                # optional; e.g. --junitxml={path} or --log-junit={path}
+
+# Extra substrings that mark a failure as wrong-reason (not valid red). Merged with built-in defaults.
+verify:
+  wrong_reason_signatures: []

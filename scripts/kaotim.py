@@ -61,27 +61,6 @@ def cmd_state(args) -> int:
     return usage(f"unknown state action: {args.action}")
 
 
-def cmd_get_package(args) -> int:
-    from lib.stack import get_package
-
-    try:
-        pkg = get_package(_repo(args), file=args.file)
-    except Exception as exc:
-        return fail(str(exc), exit_code=1)
-    return ok("package", package=pkg)
-
-
-def cmd_get_stack(args) -> int:
-    from lib.stack import get_stack_for_file
-
-    if not args.file:
-        return usage("get-stack requires --file")
-    try:
-        st = get_stack_for_file(_repo(args), args.file)
-    except Exception as exc:
-        return fail(str(exc), exit_code=1)
-    return ok("stack", stack=st)
-
 
 def cmd_check_handoff(args) -> int:
     from lib.handoff import check_handoff_file, save_handoff, validate_handoff
@@ -132,58 +111,6 @@ def cmd_log_event(args) -> int:
             return usage(f"invalid json: {exc}")
     event = log_event(args.event, repo=_repo(args), run=args.run, **fields)
     return ok("event logged", event=event)
-
-
-def cmd_adapter(args) -> int:
-    from lib.adapters.registry import (
-        get_adapter,
-        list_adapters,
-        test_signatures,
-        validate_declarative,
-    )
-    from lib.paths import kaotim_dir
-    from lib.yaml_util import load_yaml_file
-
-    repo = _repo(args)
-    extra = [kaotim_dir(repo) / "adapters", Path(__file__).resolve().parents[1] / "adapters"]
-    if args.action == "list":
-        return ok("adapters", adapters=list_adapters(extra))
-    if args.action == "validate":
-        if not args.file:
-            return usage("adapter validate requires --file")
-        data = load_yaml_file(Path(args.file))
-        errors = validate_declarative(data if isinstance(data, dict) else {})
-        if errors:
-            return fail("adapter invalid", exit_code=1, errors=errors)
-        return ok("adapter valid", adapter=data)
-    if args.action == "test":
-        if not args.id:
-            return usage("adapter test requires --id")
-        try:
-            ad = get_adapter(args.id, search_dirs=extra)
-        except KeyError as exc:
-            return fail(str(exc), exit_code=1)
-        lines = args.lines or []
-        if args.file:
-            lines = Path(args.file).read_text(encoding="utf-8").splitlines()
-        return ok("signature test", **test_signatures(ad, lines))
-    return usage(f"unknown adapter action: {args.action}")
-
-
-def cmd_detect_stack(args) -> int:
-    from lib.detect import detect_stack
-
-    digest = detect_stack(_repo(args))
-    return ok("detect-stack", digest=digest)
-
-
-def cmd_validate_stack(args) -> int:
-    from lib.validate_stack import validate_stack
-
-    result = validate_stack(_repo(args), dry_run_commands=bool(args.dry_run_commands))
-    if not result["ok"]:
-        return fail("stack invalid", exit_code=1, **result)
-    return ok("stack valid", **result)
 
 
 def cmd_check_plan(args) -> int:
@@ -299,13 +226,11 @@ def cmd_check_ownership(args) -> int:
     return ok("ownership ok", **result)
 
 
-def cmd_check_layers(args) -> int:
-    from lib.layers import check_layers
+def cmd_list_rules(args) -> int:
+    from lib.layers import list_rules
 
-    result = check_layers(_repo(args))
-    if not result["ok"]:
-        return fail("layer violations", exit_code=1, **result)
-    return ok("layers ok", **result)
+    result = list_rules(_repo(args))
+    return ok("rules", **result)
 
 
 def cmd_diff_summary(args) -> int:
@@ -372,23 +297,14 @@ def cmd_hook(args) -> int:
     return 0
 
 
-def cmd_stack_write(args) -> int:
-    from lib.init_ops import write_stack_from_detect
-
-    result = write_stack_from_detect(_repo(args), force=bool(args.force))
-    if not result.get("ok"):
-        return fail("stack write/validation failed", exit_code=1, **result)
-    return ok("stack written", **result)
-
-
 def cmd_init(args) -> int:
-    from lib.init_ops import copy_cli_to_bin, write_profile, write_stack_from_detect
+    from lib.init_ops import copy_cli_to_bin, write_config_stub, write_profile
 
     repo = _repo(args)
     copy_cli_to_bin(repo)
-    stack_result = write_stack_from_detect(repo, force=bool(args.force))
+    config = write_config_stub(repo, force=bool(args.force))
     profile = write_profile(repo)
-    return ok("initialized", stack=stack_result, profile=str(profile))
+    return ok("initialized", config=str(config), profile=str(profile))
 
 
 def cmd_refresh(args) -> int:
@@ -458,14 +374,6 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--json")
     sp.set_defaults(func=cmd_state)
 
-    sp = sub.add_parser("get-package")
-    sp.add_argument("--file")
-    sp.set_defaults(func=cmd_get_package)
-
-    sp = sub.add_parser("get-stack")
-    sp.add_argument("--file", required=True)
-    sp.set_defaults(func=cmd_get_stack)
-
     sp = sub.add_parser("check-handoff")
     sp.add_argument("--file")
     sp.add_argument("--json")
@@ -483,20 +391,6 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--run")
     sp.add_argument("--json")
     sp.set_defaults(func=cmd_log_event)
-
-    sp = sub.add_parser("adapter")
-    sp.add_argument("action", choices=["list", "validate", "test"])
-    sp.add_argument("--file")
-    sp.add_argument("--id")
-    sp.add_argument("--lines", nargs="*")
-    sp.set_defaults(func=cmd_adapter)
-
-    sp = sub.add_parser("detect-stack")
-    sp.set_defaults(func=cmd_detect_stack)
-
-    sp = sub.add_parser("validate-stack")
-    sp.add_argument("--dry-run-commands", action="store_true")
-    sp.set_defaults(func=cmd_validate_stack)
 
     sp = sub.add_parser("check-plan")
     sp.set_defaults(func=cmd_check_plan)
@@ -541,8 +435,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--task", required=True)
     sp.set_defaults(func=cmd_check_ownership)
 
-    sp = sub.add_parser("check-layers")
-    sp.set_defaults(func=cmd_check_layers)
+    sp = sub.add_parser("list-rules")
+    sp.set_defaults(func=cmd_list_rules)
 
     sp = sub.add_parser("diff-summary")
     sp.add_argument("--since")
@@ -571,10 +465,6 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("hook")
     sp.add_argument("name")
     sp.set_defaults(func=cmd_hook)
-
-    sp = sub.add_parser("stack-write")
-    sp.add_argument("--force", action="store_true")
-    sp.set_defaults(func=cmd_stack_write)
 
     sp = sub.add_parser("init")
     sp.add_argument("--force", action="store_true")

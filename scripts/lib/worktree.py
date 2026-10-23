@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from typing import Any
 
+from .config import get_commands
 from .git_util import run_git
 from .paths import ensure_kaotim_dirs
-from .stack import get_package
 from .state import read_state, write_state
 
 
@@ -20,28 +21,19 @@ def worktree_add(repo: Path, task: str) -> dict[str, Any]:
     wt = ensure_kaotim_dirs(repo) / "worktrees" / task.lower()
     if wt.exists():
         return {"ok": True, "path": str(wt), "branch": branch, "exists": True}
-    # create branch from HEAD
     code, out, err = run_git(["worktree", "add", "-b", branch, str(wt)], cwd=repo)
     if code != 0:
-        # branch may exist
         code, out, err = run_git(["worktree", "add", str(wt), branch], cwd=repo)
         if code != 0:
             return {"ok": False, "error": err or out, "path": str(wt), "branch": branch}
 
-    # run setup per stack
-    setup_logs = []
-    try:
-        pkg = get_package(repo)
-        for st in pkg.get("stacks") or []:
-            setup = (st.get("worktree") or {}).get("setup")
-            if not setup:
-                continue
-            import subprocess
-
-            root = wt / (st.get("root") or ".")
+    setup_logs: list[dict[str, Any]] = []
+    setup = (get_commands(repo).get("worktree_setup") or "").strip()
+    if setup:
+        try:
             proc = subprocess.run(
                 setup,
-                cwd=str(root),
+                cwd=str(wt),
                 shell=True,
                 capture_output=True,
                 text=True,
@@ -49,19 +41,17 @@ def worktree_add(repo: Path, task: str) -> dict[str, Any]:
                 errors="replace",
                 timeout=600,
             )
-            setup_logs.append(
-                {"stack": st.get("name"), "exit": proc.returncode, "cmd": setup}
-            )
+            setup_logs.append({"exit": proc.returncode, "cmd": setup})
             if proc.returncode != 0:
                 return {
                     "ok": False,
-                    "error": f"worktree.setup failed for {st.get('name')}",
+                    "error": "commands.worktree_setup failed",
                     "path": str(wt),
                     "branch": branch,
                     "setup": setup_logs,
                 }
-    except Exception as exc:
-        return {"ok": False, "error": str(exc), "path": str(wt), "branch": branch}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc), "path": str(wt), "branch": branch}
 
     tasks = state.setdefault("tasks", {})
     t = tasks.setdefault(task, {})
@@ -87,7 +77,6 @@ def merge_tasks(repo: Path) -> dict[str, Any]:
     if not state:
         return {"ok": False, "error": "state.json missing"}
     tasks = state.get("tasks") or {}
-    # dependency order: C0 first, then others by depends_on if present
     order = []
     if "C0" in tasks:
         order.append("C0")
@@ -101,7 +90,9 @@ def merge_tasks(repo: Path) -> dict[str, Any]:
         branch = t.get("branch")
         if not branch:
             continue
-        code, out, err = run_git(["merge", "--no-ff", branch, "-m", f"kaotim: merge {tid}"], cwd=repo)
+        code, out, err = run_git(
+            ["merge", "--no-ff", branch, "-m", f"kaotim: merge {tid}"], cwd=repo
+        )
         if code != 0:
             state["stage"] = "escalated"
             state["escalation"] = {

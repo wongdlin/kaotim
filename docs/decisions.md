@@ -79,8 +79,25 @@ status. "Proposed" items wait for the user's answer to the numbered question in 
 
 ## Skill wiring (2026-10-20; revised 2026-10-23)
 
-**Decided.** Agents and the `/kaotim` orchestrator name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". Slash entry skills use `disable-model-invocation: true` except `kaotim-explain` (auto + slash). Entry skills: `kaotim`, `kaotim-plan`, `kaotim-resume`, `kaotim-explain`, `kaotim-tree`, `kaotim-stack`, `kaotim-init`, `kaotim-doctor`, `kaotim-refresh`, `kaotim-metrics`, `kaotim-retro`. Supporting: `pr-writing` (explicit-only); `tdd`, `edge-cases`, `arch-comparison` stay auto-invocable. `commands/` removed (D9/Q2).
+**Decided.** Agents and the `/kaotim` orchestrator name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". Slash entry skills use `disable-model-invocation: true` except `kaotim-explain` (auto + slash). Entry skills: `kaotim`, `kaotim-plan`, `kaotim-resume`, `kaotim-explain`, `kaotim-tree`, `kaotim-init`, `kaotim-doctor`, `kaotim-refresh`, `kaotim-metrics`, `kaotim-retro`. Supporting: `pr-writing` (explicit-only); `tdd`, `edge-cases`, `arch-comparison` stay auto-invocable. `commands/` removed (D9/Q2). `/kaotim-stack` removed in the generic config pivot (below).
 
 ## Run completion clears state (2026-10-23)
 
 **Decided.** Do not leave `stage: done` requiring `state init --force` for every feature. On `final_gate` → complete (`next-stage` or `state complete`): archive `.kaotim/plan.md` → `.kaotim/plans/<plan_id>.md` with `status: completed`, delete `state.json`, clear `handoffs/` and `gates/`. Completion is **before** PR open — `create-pr` is best-effort; if it fails, the human opens the PR (e.g. from `.kaotim/pr.md`). `pr_created` is not a stage gate. Next run is a normal `state init` + new plan.
+
+## Generic config pivot (no adapters / stack.yaml)
+
+**Decided.** Kaotim is language-agnostic skills + CLI gates. Removed built-in adapters (`php-laravel`, `python`), `stack.yaml`, detect/validate-stack, `/kaotim-stack`, and language fixtures.
+
+| Topic | Choice |
+|-------|--------|
+| Shell runners | `.kaotim/config.yaml` → `commands.*` |
+| Planning | Does not require `commands.test` |
+| Before TDD | Non-empty `commands.test` after plan approve |
+| verify-red | Engine: exit ≠ 0 = red; optional `junit_flag`; generic wrong-reason list |
+| Structure | Agent (structure-reviewer) vs `.cursor/rules` or `rules/`; `list-rules` CLI |
+| Worktrees | Kept; `commands.worktree_setup` |
+| Migration | Hard cut — leftover `stack.yaml` fails doctor |
+| Init | Minimal: bin + config stub + profile |
+
+Pipeline stage order unchanged.

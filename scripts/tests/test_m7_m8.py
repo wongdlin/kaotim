@@ -28,17 +28,10 @@ class M7M8Tests(unittest.TestCase):
             repo = Path(tmp)
             kd = repo / ".kaotim"
             kd.mkdir()
-            (kd / "stack.yaml").write_text(
-                """version: 1
-git: {base_branch: main, commit_convention: conventional, pr_cli: none}
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: python
-        adapter: python
-        scope: ["src/**"]
-        testing: {commands: {all: "echo"}}
+            (kd / "config.yaml").write_text(
+                """git: {pr_cli: none}
+commands:
+  test: "echo ok"
 """,
                 encoding="utf-8",
             )

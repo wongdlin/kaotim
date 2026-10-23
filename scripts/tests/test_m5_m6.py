@@ -1,4 +1,4 @@
-"""M5 ownership + M6 layers."""
+"""M5 ownership hooks + M6 list-rules (agent layer enforcement)."""
 
 from __future__ import annotations
 
@@ -23,62 +23,35 @@ def run_cli(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
 
 
 class M5M6Tests(unittest.TestCase):
-    def test_check_layers_flags_violation(self) -> None:
+    def test_list_rules_discovers_cursor_and_rules(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
-            kd = repo / ".kaotim"
-            kd.mkdir()
-            (kd / "stack.yaml").write_text(
-                """version: 1
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: backend
-        adapter: php-laravel
-        scope: ["app/**"]
-        architecture:
-          style: controller-action-model
-          layers:
-            - {name: controller, path: "app/Http/Controllers/**", may_depend_on: [action]}
-            - {name: action, path: "app/Actions/**", may_depend_on: [model]}
-            - {name: model, path: "app/Models/**", may_depend_on: []}
-        testing: {commands: {all: "echo"}}
-""",
-                encoding="utf-8",
+            (repo / ".kaotim").mkdir()
+            (repo / ".kaotim" / "config.yaml").write_text(
+                'commands:\n  test: "echo ok"\n', encoding="utf-8"
             )
-            ctrl = repo / "app" / "Http" / "Controllers"
-            ctrl.mkdir(parents=True)
-            # controller importing a model directly (skipping action) — also need model file
-            models = repo / "app" / "Models"
-            models.mkdir(parents=True)
-            (models / "User.php").write_text("<?php\nnamespace App\\Models;\nclass User {}\n", encoding="utf-8")
-            (ctrl / "UserController.php").write_text(
-                "<?php\nnamespace App\\Http\\Controllers;\nuse App\\Models\\User;\nclass UserController {}\n",
-                encoding="utf-8",
-            )
-            r = run_cli(["check-layers"], repo)
-            self.assertEqual(r.returncode, 1, r.stdout)
+            cdir = repo / ".cursor" / "rules"
+            cdir.mkdir(parents=True)
+            (cdir / "arch.md").write_text("controllers may not import models\n", encoding="utf-8")
+            rdir = repo / "rules"
+            rdir.mkdir()
+            (rdir / "layers.mdc").write_text("---\nalwaysApply: false\n---\n# layers\n", encoding="utf-8")
+            r = run_cli(["list-rules"], repo)
+            self.assertEqual(r.returncode, 0, r.stdout)
             data = json.loads(r.stdout)
-            self.assertTrue(data.get("violations"))
+            self.assertTrue(data["ok"])
+            self.assertGreaterEqual(data["count"], 2)
+            joined = " ".join(data["files"])
+            self.assertIn(".cursor/rules/arch.md", joined)
+            self.assertIn("rules/layers.mdc", joined)
 
     def test_hook_denies_locked_path(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             kd = repo / ".kaotim"
             kd.mkdir()
-            (kd / "stack.yaml").write_text(
-                """version: 1
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: python
-        adapter: python
-        scope: ["tests/**"]
-        testing: {commands: {all: "echo"}}
-""",
-                encoding="utf-8",
+            (kd / "config.yaml").write_text(
+                'commands:\n  test: "echo ok"\n', encoding="utf-8"
             )
             tdir = repo / "tests"
             tdir.mkdir()

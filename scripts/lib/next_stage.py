@@ -5,12 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from .config import load_config
+from .config import has_test_command, load_config
 from .paths import kaotim_dir
 from .plan import check_plan
-from .stack import load_stack
 from .state import complete_run, read_state, write_state
-from .validate_stack import validate_stack
 
 # Canonical stage names use underscores in state.json
 TRANSITIONS = {
@@ -43,12 +41,6 @@ def evaluate(repo: Path | None = None) -> dict[str, Any]:
     nxt = TRANSITIONS.get(stage)
 
     if stage == "recon":
-        if not load_stack(repo):
-            reasons.append("stack.yaml missing")
-        else:
-            vs = validate_stack(repo)
-            if not vs["ok"]:
-                reasons.extend(vs["errors"])
         if not _profile_ok(repo or Path.cwd()):
             reasons.append("project-profile.md missing")
         nxt = "plan"
@@ -61,12 +53,16 @@ def evaluate(repo: Path | None = None) -> dict[str, Any]:
             reasons.append("approvals.plan timestamp required")
         nxt = "plan_approved"
     elif stage == "plan_approved":
+        if not has_test_command(repo):
+            reasons.append("commands.test empty in .kaotim/config.yaml (required before TDD)")
         plan_path = kaotim_dir(repo) / "plan.md"
         has_c0 = False
         if plan_path.exists():
             has_c0 = "### C0:" in plan_path.read_text(encoding="utf-8")
         nxt = "contracts" if has_c0 else "tdd_red"
     elif stage == "contracts":
+        if not has_test_command(repo):
+            reasons.append("commands.test empty in .kaotim/config.yaml (required before TDD)")
         tasks = state.get("tasks") or {}
         c0 = tasks.get("C0") or {}
         if c0.get("status") != "done":

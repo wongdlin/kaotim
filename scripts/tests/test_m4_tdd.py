@@ -70,22 +70,86 @@ class M4Tests(unittest.TestCase):
             r = parse_junit(p, "pest", [], [])
             self.assertEqual(r["failures"][0]["kind"], "wrong_reason")
 
+    def test_verify_red_text_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            kd = repo / ".kaotim"
+            kd.mkdir()
+            runner = repo / "fail_assert.py"
+            runner.write_text(
+                "import sys\nprint('AssertionError: AC-1')\nsys.exit(1)\n",
+                encoding="utf-8",
+            )
+            fail_cmd = f"{sys.executable} {runner}"
+            (kd / "config.yaml").write_text(
+                f"commands:\n  test: {json.dumps(fail_cmd)}\n",
+                encoding="utf-8",
+            )
+            (kd / "plan.md").write_text(
+                """---
+id: PLAN-1
+title: t
+status: draft
+---
+## 3. Acceptance criteria
+| ID | Criterion | Task |
+|---|---|---|
+| AC-1 | fails | T1 |
+## 4. Edge cases
+| ID | Scenario | Options | Decision | Task |
+|---|---|---|---|---|
+""",
+                encoding="utf-8",
+            )
+            run_cli(["state", "init"], repo)
+            run_cli(
+                [
+                    "state",
+                    "set",
+                    "--json",
+                    json.dumps({"tasks": {"T1": {"status": "red", "owns": ["tests/**"]}}}),
+                ],
+                repo,
+            )
+            r = run_cli(["verify-red", "--task", "T1"], repo)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_verify_red_wrong_reason(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            kd = repo / ".kaotim"
+            kd.mkdir()
+            runner = repo / "fail_import.py"
+            runner.write_text(
+                "import sys\nprint('ImportError: missing')\nsys.exit(1)\n",
+                encoding="utf-8",
+            )
+            fail_cmd = f"{sys.executable} {runner}"
+            (kd / "config.yaml").write_text(
+                f"commands:\n  test: {json.dumps(fail_cmd)}\n",
+                encoding="utf-8",
+            )
+            run_cli(["state", "init"], repo)
+            run_cli(
+                [
+                    "state",
+                    "set",
+                    "--json",
+                    json.dumps({"tasks": {"T1": {"status": "red"}}}),
+                ],
+                repo,
+            )
+            r = run_cli(["verify-red", "--task", "T1"], repo)
+            self.assertEqual(r.returncode, 1, r.stdout)
+            self.assertIn("wrong-reason", r.stdout)
+
     def test_lock_detects_edit(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             kd = repo / ".kaotim"
             kd.mkdir()
-            (kd / "stack.yaml").write_text(
-                """version: 1
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: backend
-        adapter: python
-        scope: ["tests/**"]
-        testing: {commands: {all: "echo"}}
-""",
+            (kd / "config.yaml").write_text(
+                'commands:\n  test: "echo ok"\n',
                 encoding="utf-8",
             )
             tests = repo / "tests"
@@ -115,17 +179,8 @@ packages:
             repo = Path(tmp)
             kd = repo / ".kaotim"
             kd.mkdir()
-            (kd / "stack.yaml").write_text(
-                """version: 1
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: backend
-        adapter: python
-        scope: ["tests/**"]
-        testing: {commands: {all: "echo"}}
-""",
+            (kd / "config.yaml").write_text(
+                'commands:\n  test: "echo ok"\n',
                 encoding="utf-8",
             )
             (kd / "project-profile.md").write_text("# profile\n", encoding="utf-8")
@@ -172,21 +227,12 @@ packages:
             repo = Path(tmp)
             kd = repo / ".kaotim"
             kd.mkdir()
-            (kd / "stack.yaml").write_text(
-                """version: 1
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: backend
-        adapter: python
-        scope: ["tests/**"]
-        testing: {commands: {all: "echo"}}
-""",
-                encoding="utf-8",
-            )
             (kd / "config.yaml").write_text(
-                "approvals:\n  require_tests: false\n",
+                """approvals:
+  require_tests: false
+commands:
+  test: "echo ok"
+""",
                 encoding="utf-8",
             )
             (kd / "project-profile.md").write_text("# profile\n", encoding="utf-8")

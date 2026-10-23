@@ -98,18 +98,9 @@ class M3Tests(unittest.TestCase):
         self.repo = Path(self.tmp.name)
         kd = self.repo / ".kaotim"
         kd.mkdir()
-        (kd / "stack.yaml").write_text(
-            """version: 1
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: backend
-        adapter: php-laravel
-        scope: ["app/**", "tests/**"]
-        root: "."
-        testing: {commands: {all: "echo"}}
-        quality: {}
+        (kd / "config.yaml").write_text(
+            """commands:
+  test: "echo ok"
 """,
             encoding="utf-8",
         )

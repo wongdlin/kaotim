@@ -19,15 +19,8 @@ def find_repo_root(start: Path | None = None) -> Path:
     for candidate in [cur, *cur.parents]:
         if (candidate / ".git").exists() or (candidate / ".kaotim").exists():
             return candidate
-        if (candidate / "composer.json").exists() or (candidate / "pyproject.toml").exists():
-            # fixture / project root without .git
-            if (candidate / ".kaotim").exists() or candidate.name in {
-                "laravel-app",
-                "laravel-app-phpunit",
-                "python-app",
-                "mixed",
-            }:
-                return candidate
+        if (candidate / ".kaotim").exists():
+            return candidate
     return cur
 
 
@@ -37,6 +30,6 @@ def kaotim_dir(repo: Path | None = None) -> Path:
 
 def ensure_kaotim_dirs(repo: Path | None = None) -> Path:
     root = kaotim_dir(repo)
-    for name in ("handoffs", "gates", "metrics", "worktrees", "adapters", "bin", "plans"):
+    for name in ("handoffs", "gates", "metrics", "worktrees", "bin", "plans"):
         (root / name).mkdir(parents=True, exist_ok=True)
     return root

@@ -1,4 +1,4 @@
-"""M1 acceptance: state, handoff, metrics, get-package, adapter, exit codes."""
+"""M1 acceptance: state, handoff, metrics, config, exit codes."""
 
 from __future__ import annotations
 
@@ -12,6 +12,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CLI = ROOT / "scripts" / "kaotim.py"
+
+CONFIG = """git: {base_branch: main, pr_cli: none}
+commands:
+  test: "echo ok"
+  lint: ""
+  typecheck: ""
+  build: ""
+"""
 
 
 def run_cli(args: list[str], cwd: Path, input_text: str | None = None) -> subprocess.CompletedProcess:
@@ -30,23 +38,7 @@ class M1Tests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = Path(self.tmp.name)
         (self.repo / ".kaotim").mkdir()
-        # minimal stack
-        stack = """version: 1
-git: {base_branch: main, commit_convention: conventional, pr_cli: none}
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: backend
-        adapter: php-laravel
-        scope: ["app/**", "tests/**"]
-        root: "."
-        testing:
-          framework: pest
-          commands: {all: "echo ok", single: "echo ok", affected: "echo ok"}
-        quality: {lint: "", typecheck: "", build: ""}
-"""
-        (self.repo / ".kaotim" / "stack.yaml").write_text(stack, encoding="utf-8")
+        (self.repo / ".kaotim" / "config.yaml").write_text(CONFIG, encoding="utf-8")
 
     def tearDown(self) -> None:
         self.tmp.cleanup()
@@ -60,12 +52,15 @@ packages:
         self.assertEqual(bad.returncode, 2)
         self.assertFalse(json.loads(bad.stdout)["ok"])
 
-    def test_get_package(self) -> None:
-        r = run_cli(["get-package"], self.repo)
-        self.assertEqual(r.returncode, 0, r.stdout)
-        pkg = json.loads(r.stdout)["package"]
-        self.assertEqual(pkg["name"], "default")
-        self.assertEqual(len(pkg["stacks"]), 1)
+    def test_init_writes_config_and_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            r = run_cli(["init", "--force"], repo)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertTrue((repo / ".kaotim" / "config.yaml").exists())
+            self.assertTrue((repo / ".kaotim" / "project-profile.md").exists())
+            self.assertTrue((repo / ".kaotim" / "bin" / "kaotim.py").exists())
+            self.assertFalse((repo / ".kaotim" / "stack.yaml").exists())
 
     def test_handoff_size_rejected(self) -> None:
         big = "x" * 1300
@@ -103,29 +98,25 @@ packages:
         lines = metrics[0].read_text(encoding="utf-8").strip().splitlines()
         self.assertGreaterEqual(len(lines), 12)
         for line in lines:
-            json.loads(line)  # must be valid JSONL
+            json.loads(line)
 
-    def test_adapter_list_and_validate(self) -> None:
-        r = run_cli(["adapter", "list"], self.repo)
-        self.assertEqual(r.returncode, 0)
-        ids = {a["id"] for a in json.loads(r.stdout)["adapters"]}
-        self.assertIn("php-laravel", ids)
-        self.assertIn("python", ids)
-        decl = self.repo / "decl.yaml"
-        decl.write_text(
-            """adapter_version: 1
-id: js-ts
-detect: {manifests: ["package.json"]}
-capabilities: {verify_red: text, check_layers: approximate}
-tests:
-  assertion_signatures: ["AssertionError"]
-  wrong_reason_signatures: ["Cannot find module"]
-  id_pattern: "(AC|EC)-\\\\d+"
-""",
-            encoding="utf-8",
-        )
-        v = run_cli(["adapter", "validate", "--file", str(decl)], self.repo)
-        self.assertEqual(v.returncode, 0, v.stdout)
+    def test_list_rules(self) -> None:
+        rules = self.repo / ".cursor" / "rules"
+        rules.mkdir(parents=True)
+        (rules / "layers.md").write_text("# no domain in UI\n", encoding="utf-8")
+        r = run_cli(["list-rules"], self.repo)
+        self.assertEqual(r.returncode, 0, r.stdout)
+        data = json.loads(r.stdout)
+        self.assertTrue(data["ok"])
+        self.assertIn(".cursor/rules/layers.md", data["files"])
+
+    def test_doctor_rejects_stack_yaml(self) -> None:
+        (self.repo / ".kaotim" / "stack.yaml").write_text("version: 1\n", encoding="utf-8")
+        (self.repo / ".kaotim" / "project-profile.md").write_text("# p\n", encoding="utf-8")
+        r = run_cli(["doctor"], self.repo)
+        self.assertEqual(r.returncode, 1)
+        detail = json.dumps(json.loads(r.stdout))
+        self.assertIn("no-stack.yaml", detail)
 
     def test_trim_and_exit_codes(self) -> None:
         r = run_cli(["trim-output"], self.repo, input_text="ok\nFAIL something\n")

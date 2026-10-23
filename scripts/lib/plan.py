@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .paths import kaotim_dir
-from .stack import get_stack_for_file, load_stack, scopes_overlap
+from .stack import scopes_overlap
 
 
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
@@ -285,28 +285,6 @@ def check_plan(repo: Path | None = None) -> dict[str, Any]:
                     pass
 
     deps_ok()
-
-    # stack resolution for owns (except C0)
-    if load_stack(repo):
-        for tid, t in tasks.items():
-            if tid == "C0":
-                continue
-            stacks_hit = set()
-            for pattern in t["owns"]:
-                # use pattern as file candidate for get-stack
-                sample = pattern.replace("**", "x").replace("*", "x")
-                try:
-                    st = get_stack_for_file(repo, sample)
-                    stacks_hit.add(st["name"])
-                except Exception:
-                    # try first scope file literal
-                    try:
-                        st = get_stack_for_file(repo, pattern.rstrip("/*"))
-                        stacks_hit.add(st["name"])
-                    except Exception as exc:
-                        warnings.append(f"{tid} owns '{pattern}': {exc}")
-            if len(stacks_hit) > 1:
-                errors.append(f"{tid} owns files in multiple stacks: {sorted(stacks_hit)}")
 
     if status == "approved" and parsed["blocking_questions"]:
         errors.append("approved plan has blocking open questions")

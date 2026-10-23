@@ -22,16 +22,9 @@ def run_cli(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
     )
 
 
-STACK = """version: 1
-git: {base_branch: main, commit_convention: conventional, pr_cli: none}
-packages:
-  - name: default
-    path: "."
-    stacks:
-      - name: python
-        adapter: python
-        scope: ["src/**"]
-        testing: {commands: {all: "echo"}}
+CONFIG = """git: {pr_cli: none}
+commands:
+  test: "echo ok"
 """
 
 PLAN = """---
@@ -50,7 +43,7 @@ class CompleteRunTests(unittest.TestCase):
         self.repo = Path(self.tmp.name)
         kd = self.repo / ".kaotim"
         kd.mkdir()
-        (kd / "stack.yaml").write_text(STACK, encoding="utf-8")
+        (kd / "config.yaml").write_text(CONFIG, encoding="utf-8")
         (kd / "plan.md").write_text(PLAN, encoding="utf-8")
 
     def tearDown(self) -> None:

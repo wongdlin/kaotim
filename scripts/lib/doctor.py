@@ -8,9 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from . import PLUGIN_VERSION
+from .config import has_test_command, load_config
 from .paths import kaotim_dir, plugin_root
-from .stack import load_stack
-from .validate_stack import validate_stack
 
 WORD_BUDGETS = {
     "agents": 600,
@@ -32,23 +31,34 @@ def doctor(repo: Path, self_check: bool = False) -> dict[str, Any]:
     add("git", shutil.which("git") is not None, "git on PATH")
     add("node_optional", True, "Node not required (Python runtime)")
 
-    stack = load_stack(repo)
-    add("stack.yaml", stack is not None, "present" if stack else "missing")
-    if stack:
-        vs = validate_stack(repo)
-        add("validate-stack", vs["ok"], "; ".join(vs["errors"][:5]))
+    stack = kaotim_dir(repo) / "stack.yaml"
+    add(
+        "no-stack.yaml",
+        not stack.exists(),
+        "remove leftover .kaotim/stack.yaml (hard cut; use config.yaml commands)"
+        if stack.exists()
+        else "absent",
+    )
+
+    cfg_path = kaotim_dir(repo) / "config.yaml"
+    add("config.yaml", cfg_path.exists(), str(cfg_path) if cfg_path.exists() else "missing (run /kaotim-init)")
+    if cfg_path.exists():
+        load_config(repo)  # ensure merges
+        add(
+            "commands.test",
+            True,
+            "set" if has_test_command(repo) else "empty (required after plan approve, before TDD)",
+        )
 
     profile = kaotim_dir(repo) / "project-profile.md"
     add("project-profile", profile.exists(), str(profile))
 
     bin_cli = kaotim_dir(repo) / "bin" / "kaotim.py"
     if bin_cli.exists():
-        text = bin_cli.read_text(encoding="utf-8", errors="replace")[:200]
-        add("bin-version", PLUGIN_VERSION in text or True, f"copied CLI present ({bin_cli})")
+        add("bin-version", True, f"copied CLI present ({bin_cli})")
     else:
         add("bin-version", True, "bin copy not required until /kaotim-init")
 
-    # safety: look for dangerous DB env in phpunit.xml
     for xml in repo.glob("phpunit.xml*"):
         text = xml.read_text(encoding="utf-8", errors="replace")
         if re.search(r"DB_DATABASE.*production", text, re.I):
@@ -59,7 +69,6 @@ def doctor(repo: Path, self_check: bool = False) -> dict[str, Any]:
     if self_check:
         self_checks = _self_checks()
         checks.extend(self_checks)
-        # --self is for plugin authors: only word-budget / prompt checks gate the exit code
         ok = all(c["ok"] for c in self_checks)
 
     return {"ok": ok, "checks": checks, "plugin_version": PLUGIN_VERSION}
@@ -77,7 +86,6 @@ def _self_checks() -> list[dict[str, Any]]:
         out.append({"name": "budget:agents", "ok": True, "detail": "missing (ok early)"})
     else:
         for path in agents.glob("*.md"):
-            # skip frontmatter roughly
             body = path.read_text(encoding="utf-8")
             if body.startswith("---"):
                 parts = body.split("---", 2)
@@ -103,7 +111,6 @@ def _self_checks() -> list[dict[str, Any]]:
                 "detail": f"{wc}/{WORD_BUDGETS['skills']} words",
             }
         )
-    # always-apply rules total <= 40 lines
     rules = root / "rules"
     always_lines = 0
     if rules.exists():
