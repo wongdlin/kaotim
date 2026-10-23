@@ -102,22 +102,29 @@ is agent-enforced (structure-reviewer reads those files via `list-rules`).
 - Git; safe local test database when your suite needs one
 - Optional: `gh` / `glab` for draft PRs
 
-## Install for local development
+## How to install
+
+Clone the repo, then install into Cursor’s local plugins folder (Reload Window after):
 
 ```powershell
-# IDE (Windows): copy into local plugins, then Reload Window
-Copy-Item -Recurse D:\Plugin\kaotim $HOME\.cursor\plugins\local\kaotim
+# Windows
+git clone https://github.com/wongdlin/kaotim.git
+Copy-Item -Recurse .\kaotim $HOME\.cursor\plugins\local\kaotim
 
 # CLI agent
-agent --plugin-dir D:\Plugin\kaotim
+agent --plugin-dir $HOME\.cursor\plugins\local\kaotim
 ```
 
 ```bash
 # macOS / Linux
-cp -r /path/to/kaotim ~/.cursor/plugins/local/kaotim
+git clone https://github.com/wongdlin/kaotim.git
+cp -r kaotim ~/.cursor/plugins/local/kaotim
+
+# CLI agent
+agent --plugin-dir ~/.cursor/plugins/local/kaotim
 ```
 
-Run plugin self-tests:
+Run plugin self-tests from the cloned repo:
 
 ```powershell
 py -3 -m unittest discover -s scripts/tests -p "test_*.py"
