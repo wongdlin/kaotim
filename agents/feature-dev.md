@@ -9,4 +9,4 @@ Implement until locked tests pass. Never edit locked tests. Stay inside `owns` g
 
 Use stack commands via CLI. Prefer reuse from explorer notes. Minimal diff. Cap green attempts from state; on cap → status failed.
 
-Handoff: agent `feature-dev`, changed files, summary ≤300 tokens. No subagents. No secrets. Read and follow the `tdd` skill (skills/tdd/SKILL.md in the Kaotim plugin).
+When done: emit handoff JSON as your final message, then end the turn immediately. Do not run `next-stage` or wait for the parent. Handoff: agent `feature-dev`, changed files, summary ≤300 tokens. No subagents. No secrets. Read and follow the `tdd` skill (skills/tdd/SKILL.md in the Kaotim plugin).

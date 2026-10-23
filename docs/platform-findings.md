@@ -200,7 +200,7 @@ real 0m0.019s   # one hook invocation
 | `test-lock` | Primary works as designed but via `preToolUse` (Write, Delete), not a "before-edit" event. Shell writes (`sed -i`, `>`) are not caught, so `verify-lock` in every gate stays mandatory. Paths must be normalised from worktree paths (`.kaotim/worktrees/<t>/tests/...`) to repo paths, because `CURSOR_PROJECT_DIR` is the main checkout |
 | `ownership` | No documented way to tell which subagent made a tool call. A worktree path does identify the task, so M5 can deny writes outside that task's `owns` (to verify). Fallback stays `check-ownership` |
 | `manifest-change` | `afterFileEdit` / `afterShellExecution`, advisory. Fine |
-| `stage-guard` | `stop` cannot block. Use `followup_message` to send the agent back while a stage is mid-flight (bounded by `loop_limit`) plus the orchestrator prompt reminder |
+| `stage-guard` | `stop` cannot block. **Do not** use `followup_message` for mid-flight stages — it also continues Task specialists and hangs the parent. Enforce via orchestrator prompts + gates; `awaiting_user` / `awaiting_specialist`; `loop_limit: 1` on stop |
 | `subagent-metrics` | `subagentStart`/`subagentStop` give type, model, duration, message and tool-call counts, modified files; no tokens (V6) |
 | Laravel/Python guards (C.5, E.5) | `beforeShellExecution` can deny destructive commands live |
 

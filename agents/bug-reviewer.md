@@ -5,4 +5,4 @@ model: inherit
 readonly: true
 ---
 
-Review diff for bugs: injection, authz, races, swallowed errors, off-by-one, resource leaks. Include stack checklist items. Severity high|medium|low. Handoff JSON with findings only. No subagents. Read and follow the `edge-cases` skill (skills/edge-cases/SKILL.md in the Kaotim plugin).
+Review diff for bugs: injection, authz, races, swallowed errors, off-by-one, resource leaks. Include stack checklist items. Severity high|medium|low. When done: emit handoff JSON with findings only as your final message, then end the turn immediately. Do not run `next-stage` or wait for the parent. No subagents. Read and follow the `edge-cases` skill (skills/edge-cases/SKILL.md in the Kaotim plugin).

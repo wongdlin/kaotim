@@ -33,7 +33,10 @@ def handle_hook(name: str, payload: dict[str, Any] | None = None) -> dict[str, A
     if name in {"ownership", "afterFileEdit"}:
         return _ownership_hint(payload, repo)
     if name in {"stop", "stage-guard"}:
-        return _stage_guard(repo)
+        return _stage_guard(repo, payload)
+    if name == "subagentStop":
+        # Never auto-continue specialists — they must return to the orchestrator.
+        return {}
     if name == "subagentStart":
         # optional deny nested spawns — cannot always detect; allow
         return {"permission": "allow"}
@@ -95,22 +98,18 @@ def _ownership_hint(payload: dict[str, Any], repo: Path) -> dict[str, Any]:
     return {"permission": "allow"}
 
 
-def _stage_guard(repo: Path) -> dict[str, Any]:
-    state = read_state(repo)
-    if not state:
-        return {}
-    if state.get("stage_status") == "in_progress" and state.get("stage") not in {
-        "done",
-        "pr",
-        "escalated",
-        "aborted",
-    }:
-        return {
-            "followup_message": (
-                f"Kaotim stage `{state.get('stage')}` is still in_progress. "
-                "Run `python scripts/kaotim.py next-stage` (or finish the stage gates) before stopping."
-            )
-        }
+def _stage_guard(repo: Path, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Allow clean stops — do not auto-continue via followup_message.
+
+    Previous behaviour returned followup_message whenever stage_status was in_progress
+    (the default after every next-stage). Cursor's stop hook can fire for nested Task
+    agent loops as well as the hub; specialists were then auto-continued instead of
+    returning, and the parent sat on \"waiting for subagent\" for many minutes.
+
+    Stage progress is enforced by orchestrator prompts + next-stage gates, not by
+    stop follow-ups. payload is accepted for forward compatibility / tests.
+    """
+    _ = (repo, payload)
     return {}
 
 

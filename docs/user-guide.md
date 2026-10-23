@@ -65,3 +65,4 @@ Committed: `stack.yaml`, `project-profile.md`, optional `config.yaml`. Runtime (
 - Gate failures: open `.kaotim/gates/` raw logs.
 - Locked tests: `unlock-tests` only with a reason after human approval.
 - Resume: fresh chat + `/kaotim-resume`.
+- Parent stuck on "waiting for subagent" after tests/files already exist: cancel the subagent, check `.kaotim/handoffs/` and written files, then `/kaotim-resume` (set `stage_status` to `in_progress` if it was left as `awaiting_specialist`). Ensure the installed plugin includes the stage-guard fix (no `stop` follow-up loops).

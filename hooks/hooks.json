@@ -19,7 +19,14 @@
     ],
     "stop": [
       {
-        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook stop"
+        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook stop",
+        "loop_limit": 1
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "python \"${CURSOR_PLUGIN_ROOT}/scripts/kaotim.py\" hook subagentStop",
+        "loop_limit": 0
       }
     ],
     "subagentStart": [

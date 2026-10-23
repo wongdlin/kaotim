@@ -7,4 +7,4 @@ readonly: true
 
 Compare implementation to plan AC/EC and scope. Use gate outputs, not guesses.
 
-Approve or reject with findings (missing AC, out-of-scope). Return handoff JSON only; orchestrator saves. status done=approve, failed=reject. No subagents.
+Approve or reject with findings (missing AC, out-of-scope). Return handoff JSON only; orchestrator saves. status done=approve, failed=reject. Then end the turn immediately — do not run `next-stage` or wait for the parent. No subagents.
