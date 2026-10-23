@@ -55,6 +55,9 @@ def cmd_state(args) -> int:
         except ValueError as exc:
             return fail(str(exc), exit_code=2)
         return ok("state updated", state=data)
+    if args.action == "complete":
+        data = st.complete_run(repo)
+        return ok("run completed; state cleared", **data)
     return usage(f"unknown state action: {args.action}")
 
 
@@ -201,9 +204,18 @@ def cmd_next_stage(args) -> int:
         ev = evaluate(repo)
         return ok("next-stage dry-run", **ev) if ev.get("can_advance") else fail(ev.get("reason") or "blocked", exit_code=1, **ev)
     result = advance(repo)
-    log_event("stage_end" if result.get("advanced") else "stage_blocked", repo=repo, stage=result.get("stage"))
+    run_id = result.get("plan_id")  # set when complete_run cleared state
+    log_event(
+        "stage_end" if result.get("advanced") else "stage_blocked",
+        repo=repo,
+        run=run_id,
+        stage=result.get("stage"),
+    )
     if result.get("advanced"):
-        log_event("stage_start", repo=repo, stage=result.get("stage"))
+        if result.get("completed"):
+            log_event("run_complete", repo=repo, run=run_id, stage="done")
+        else:
+            log_event("stage_start", repo=repo, run=run_id, stage=result.get("stage"))
         return ok("advanced", **result)
     return fail(result.get("reason") or "not advanced", exit_code=1, **result)
 
@@ -439,7 +451,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sp = sub.add_parser("state")
-    sp.add_argument("action", choices=["init", "show", "set"])
+    sp.add_argument("action", choices=["init", "show", "set", "complete"])
     sp.add_argument("--plan-id")
     sp.add_argument("--package")
     sp.add_argument("--force", action="store_true")

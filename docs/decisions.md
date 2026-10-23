@@ -77,3 +77,7 @@ upgrades them once the user runs it.
 ## Skill wiring (2026-10-20)
 
 **Decided.** Commands and agents name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". `disable-model-invocation: true` (confirmed in Cursor skills docs) on retro, pr-writing, kaotim-planning, stack-detection; tdd, edge-cases, arch-comparison stay auto-invocable.
+
+## Run completion clears state (2026-10-23)
+
+**Decided.** Do not leave `stage: done` requiring `state init --force` for every feature. On `final_gate` → complete (`next-stage` or `state complete`): archive `.kaotim/plan.md` → `.kaotim/plans/<plan_id>.md` with `status: completed`, delete `state.json`, clear `handoffs/` and `gates/`. Completion is **before** PR open — `create-pr` is best-effort; if it fails, the human opens the PR (e.g. from `.kaotim/pr.md`). `pr_created` is not a stage gate. Next run is a normal `state init` + new plan.

@@ -9,7 +9,7 @@ from .config import load_config
 from .paths import kaotim_dir
 from .plan import check_plan
 from .stack import load_stack
-from .state import read_state, write_state
+from .state import complete_run, read_state, write_state
 from .validate_stack import validate_stack
 
 # Canonical stage names use underscores in state.json
@@ -25,8 +25,8 @@ TRANSITIONS = {
     "structure_review": "bug_review",
     "bug_review": "cleanup",
     "cleanup": "final_gate",
-    "final_gate": "pr",
-    "pr": "done",
+    "final_gate": "done",  # complete before optional PR; human can open PR if create-pr fails
+    "pr": "done",  # legacy mid-run: still finish without requiring pr_created
 }
 
 
@@ -130,10 +130,10 @@ def evaluate(repo: Path | None = None) -> dict[str, Any]:
             reasons.append("approvals.pr required")
         if (state.get("gates") or {}).get("last_run", {}).get("ok") is not True:
             reasons.append("final gate not green")
-        nxt = "pr"
+        # Ship gate passed → complete run; PR open is optional (CLI or human)
+        nxt = "done"
     elif stage == "pr":
-        if (state.get("gates") or {}).get("pr_created") is not True:
-            reasons.append("PR not created")
+        # Legacy: runs left in `pr` still complete without pr_created
         nxt = "done"
     elif stage in {"done", "escalated", "aborted"}:
         return {
@@ -182,6 +182,16 @@ def advance(repo: Path | None = None) -> dict[str, Any]:
         return {**ev, "advanced": False, "stage": "escalated"}
     if not ev.get("can_advance"):
         return {**ev, "advanced": False}
+    # Successful PR finish: archive plan + clear runtime so the next feature starts clean
+    if ev.get("next") == "done":
+        finished = complete_run(repo)
+        return {
+            **ev,
+            "advanced": True,
+            "stage": "done",
+            "completed": True,
+            **finished,
+        }
     state = read_state(repo)
     assert state
     state["stage"] = ev["next"]

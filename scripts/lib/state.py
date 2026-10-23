@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import re
+import shutil
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -10,7 +12,7 @@ from typing import Any
 
 from . import PLUGIN_VERSION
 from .config import load_config
-from .io_util import atomic_write_json
+from .io_util import atomic_write_json, atomic_write_text
 from .paths import ensure_kaotim_dirs, kaotim_dir
 
 STAGES = [
@@ -133,3 +135,82 @@ def set_state_fields(updates: dict[str, Any], repo: Path | None = None) -> dict[
             new_state[key] = value
     write_state(new_state, repo)
     return new_state
+
+
+def _clear_dir_contents(path: Path) -> int:
+    """Remove files/subdirs under path; keep the directory. Returns count removed."""
+    if not path.is_dir():
+        return 0
+    n = 0
+    for child in path.iterdir():
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+        n += 1
+    return n
+
+
+def _mark_plan_completed(text: str) -> str:
+    """Set frontmatter status to completed; add status line if missing."""
+    fm = re.match(r"^---\s*\n(.*?)\n---\s*\n?", text, re.DOTALL)
+    if not fm:
+        return "---\nstatus: completed\n---\n\n" + text
+    body = text[fm.end() :]
+    meta_block = fm.group(1)
+    if re.search(r"(?m)^status\s*:", meta_block):
+        meta_block = re.sub(
+            r"(?m)^(status\s*:\s*).*$",
+            r"\1completed",
+            meta_block,
+            count=1,
+        )
+    else:
+        meta_block = meta_block.rstrip() + "\nstatus: completed"
+    return f"---\n{meta_block}\n---\n{body}"
+
+
+def complete_run(repo: Path | None = None) -> dict[str, Any]:
+    """Archive active plan as completed, clear runtime state for a fresh next run.
+
+    Moves ``.kaotim/plan.md`` → ``.kaotim/plans/<plan_id>.md`` with ``status: completed``,
+    clears ``state.json``, ``handoffs/``, and ``gates/``. Metrics and ``pr.md`` are kept.
+    """
+    ensure_kaotim_dirs(repo)
+    root = kaotim_dir(repo)
+    state = read_state(repo)
+    plan_id = (state or {}).get("plan_id") or "PLAN-UNKNOWN"
+    plan_file = root / "plan.md"
+    archived: str | None = None
+
+    if plan_file.exists():
+        text = _mark_plan_completed(plan_file.read_text(encoding="utf-8"))
+        # Prefer id from plan frontmatter when present
+        m = re.search(r"(?m)^id\s*:\s*(.+)$", text)
+        if m:
+            plan_id = m.group(1).strip().strip("'\"") or plan_id
+        dest = root / "plans" / f"{plan_id}.md"
+        if dest.exists():
+            stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            dest = root / "plans" / f"{plan_id}-{stamp}.md"
+        atomic_write_text(dest, text)
+        plan_file.unlink()
+        archived = str(dest)
+
+    cleared_handoffs = _clear_dir_contents(root / "handoffs")
+    cleared_gates = _clear_dir_contents(root / "gates")
+
+    sp = state_path(repo)
+    if sp.exists():
+        sp.unlink()
+
+    return {
+        "ok": True,
+        "plan_id": plan_id,
+        "archived_plan": archived,
+        "cleared": {
+            "state": True,
+            "handoffs": cleared_handoffs,
+            "gates": cleared_gates,
+        },
+    }

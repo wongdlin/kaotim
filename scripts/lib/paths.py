@@ -37,6 +37,6 @@ def kaotim_dir(repo: Path | None = None) -> Path:
 
 def ensure_kaotim_dirs(repo: Path | None = None) -> Path:
     root = kaotim_dir(repo)
-    for name in ("handoffs", "gates", "metrics", "worktrees", "adapters", "bin"):
+    for name in ("handoffs", "gates", "metrics", "worktrees", "adapters", "bin", "plans"):
         (root / name).mkdir(parents=True, exist_ok=True)
     return root

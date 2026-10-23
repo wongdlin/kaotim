@@ -157,6 +157,17 @@ def check_plan(repo: Path | None = None) -> dict[str, Any]:
     status = (meta.get("status") or "draft").lower()
     tasks = parsed["tasks"]
 
+    if status == "completed":
+        return {
+            "ok": False,
+            "errors": [
+                "plan.md status is completed (stale); remove it or run state complete — "
+                "active work needs a new plan"
+            ],
+            "warnings": [],
+            "status": status,
+        }
+
     # Goal / Done when (SPEC entry)
     goal = parsed.get("goal") or ""
     if not re.search(r"Done when:\s*\S", goal, re.IGNORECASE):

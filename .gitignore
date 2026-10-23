@@ -2,6 +2,7 @@
 .kaotim/handoffs/
 .kaotim/gates/
 .kaotim/worktrees/
+.kaotim/plans/
 .kaotim/metrics/*.jsonl
 .kaotim/metrics/*.lock
 .kaotim/state.json

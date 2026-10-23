@@ -57,7 +57,7 @@ Human checkpoints: planning, test approval after `tdd_red` (default on), escalat
 
 ## 7. What lives where
 
-Committed: `stack.yaml`, `project-profile.md`, optional `config.yaml`. Runtime (gitignored): `state.json`, `handoffs/`, `gates/`, `worktrees/`, most metrics JSONL.
+Committed: `stack.yaml`, `project-profile.md`, optional `config.yaml`. Runtime (gitignored): `state.json`, `handoffs/`, `gates/`, `worktrees/`, `plans/` (archived completed plans), most metrics JSONL. After `final_gate` + `approvals.pr`, `next-stage` archives `plan.md` → `plans/<id>.md` and clears state (before PR open). `create-pr` is best-effort; if it fails, open the PR yourself from `.kaotim/pr.md`. Next feature: `state init` (no `--force`).
 
 ## 8. Troubleshooting
 

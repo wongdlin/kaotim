@@ -36,6 +36,7 @@ def copy_cli_to_bin(repo: Path) -> Path:
         ".kaotim/handoffs/",
         ".kaotim/gates/",
         ".kaotim/worktrees/",
+        ".kaotim/plans/",
         ".kaotim/metrics/*.jsonl",
         ".kaotim/state.json",
     ]
