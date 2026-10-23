@@ -142,7 +142,7 @@ py -3 -m unittest discover -s scripts/tests -p "test_*.py"
 
 ## License
 
-TBD. No license has been chosen yet; until one is added, all rights are reserved.
+[MIT](LICENSE) © 2026 Dong Lin Wong
 
 ## Author
 
