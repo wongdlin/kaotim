@@ -421,7 +421,7 @@ def cmd_retro(args) -> int:
         proposals.append(
             {
                 "metric": "supervisor_rejects",
-                "file": "skills/kaotim-planning/SKILL.md",
+                "file": "skills/kaotim-plan/SKILL.md",
                 "suggestion": "Tighten AC mapping and explorer reuse checks.",
             }
         )

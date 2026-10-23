@@ -35,9 +35,13 @@ Review `.kaotim/stack.yaml` and `.kaotim/project-profile.md`, then commit them.
 
 CLI used throughout: `python .kaotim/bin/kaotim.py <subcommand>` after init.
 
-## 5. Commands
+## 5. Slash entry skills
 
-| Command | Purpose |
+Type `/` in Agent chat and select a skill. These are Agent Skills under `skills/` (not a
+separate `commands/` folder). `kaotim-explain` may also apply automatically when you ask to
+explain selected code; the others are slash-only.
+
+| Skill | Purpose |
 |---|---|
 | `/kaotim` | Full pipeline |
 | `/kaotim-plan` | Planning only |

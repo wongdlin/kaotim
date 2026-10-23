@@ -1,5 +1,0 @@
----
-description: Kaotim spike always-apply rule probe
-alwaysApply: true
----
-If the user message contains "kaotim-spike rules?", list every token of the form RULE-*-OK you can see in your instructions. Token: RULE-ALWAYS-OK.

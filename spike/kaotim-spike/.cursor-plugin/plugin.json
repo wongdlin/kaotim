@@ -1,9 +1,0 @@
-{
-  "name": "kaotim-spike",
-  "displayName": "Kaotim M0 spike (throwaway)",
-  "version": "0.0.1",
-  "description": "Throwaway M0 spike that probes Cursor plugin capabilities V1-V11 for Kaotim. Not for use.",
-  "author": { "name": "Dong Lin Wong" },
-  "license": "MIT",
-  "keywords": ["kaotim", "spike"]
-}

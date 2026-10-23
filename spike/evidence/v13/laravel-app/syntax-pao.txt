@@ -1,1 +1,0 @@
-{"tool":"pest","raw":["ParseError","syntax error, unexpected token \"}\"","at tests/Unit/SyntaxTest.php:2","1 <?php","2 it(\"AC-6: syntax\", function () { expect(1)->toBe(1) }","3"]}

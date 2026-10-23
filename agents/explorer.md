@@ -16,4 +16,4 @@ Return ONLY this handoff JSON (orchestrator will save it):
 {"agent":"explorer","task":null,"attempt":1,"status":"done","changed":[],"summary":"3 lines max","findings":[],"question":null,"details":null}
 ```
 
-List concrete paths to reuse. Never invent APIs. Never spawn subagents. If stack/ecosystem context is relevant, you may use evidence per the `stack-detection` skill (skills/stack-detection/SKILL.md in the Kaotim plugin); do not write stack files.
+List concrete paths to reuse. Never invent APIs. Never spawn subagents. If stack/ecosystem context is relevant, you may use evidence per the `kaotim-stack` skill (skills/kaotim-stack/SKILL.md in the Kaotim plugin); do not write stack files.

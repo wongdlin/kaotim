@@ -15,7 +15,6 @@ from .validate_stack import validate_stack
 WORD_BUDGETS = {
     "agents": 600,
     "skills": 600,
-    "commands": 250,
 }
 
 
@@ -73,15 +72,11 @@ def _word_count(text: str) -> int:
 def _self_checks() -> list[dict[str, Any]]:
     root = plugin_root()
     out = []
-    for folder, budget in (
-        ("agents", WORD_BUDGETS["agents"]),
-        ("commands", WORD_BUDGETS["commands"]),
-    ):
-        d = root / folder
-        if not d.exists():
-            out.append({"name": f"budget:{folder}", "ok": True, "detail": "missing (ok early)"})
-            continue
-        for path in d.glob("*.md"):
+    agents = root / "agents"
+    if not agents.exists():
+        out.append({"name": "budget:agents", "ok": True, "detail": "missing (ok early)"})
+    else:
+        for path in agents.glob("*.md"):
             # skip frontmatter roughly
             body = path.read_text(encoding="utf-8")
             if body.startswith("---"):
@@ -91,8 +86,8 @@ def _self_checks() -> list[dict[str, Any]]:
             out.append(
                 {
                     "name": f"budget:{path.name}",
-                    "ok": wc <= budget,
-                    "detail": f"{wc}/{budget} words",
+                    "ok": wc <= WORD_BUDGETS["agents"],
+                    "detail": f"{wc}/{WORD_BUDGETS['agents']} words",
                 }
             )
     for skill in (root / "skills").glob("*/SKILL.md") if (root / "skills").exists() else []:

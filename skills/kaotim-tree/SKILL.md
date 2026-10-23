@@ -10,7 +10,9 @@ disable-model-invocation: true
 
 # Kaotim tree
 
-Trace the **selected or attached** symbol. Output a compact Mermaid flow plus tiny key snippets. Minimize tokens: search first, open little, write little.
+Trace the selected / attached code as a call-flow tree. Extra focus if given: $ARGUMENTS
+
+Trace the **selected or attached** symbol. Output a compact Mermaid flow plus tiny key snippets. Minimize tokens: search first, open little, write little. All upstream to entry points; one downstream hop only. Do not change the code.
 
 ## Scope
 

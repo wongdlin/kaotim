@@ -24,7 +24,8 @@ declares victory without evidence. Kaotim answers with **structure plus enforcem
 ## How it works
 
 Hub-and-spoke orchestration; shared memory under `.kaotim/`; scripts decide stage transitions.
-See the state machine and agent roster in earlier design notes; commands live in `commands/`.
+See the state machine and agent roster in earlier design notes; slash entry points are skills
+under `skills/` (type `/` in Agent chat).
 
 ### Specialist subagents
 
@@ -41,9 +42,12 @@ See the state machine and agent roster in earlier design notes; commands live in
 | `cleaner` | write (diff only) | Remove debug leftovers |
 | `pr-writer` | read-only | PR body with AC → test → status |
 
-## Commands
+## Skills (slash entry)
 
-| Command | Purpose |
+Type `/` in Agent chat and pick a skill. Entry skills are slash-only except `kaotim-explain`
+(also auto when you ask to explain selected code).
+
+| Skill | Purpose |
 |---|---|
 | `/kaotim <request>` | Full pipeline (or resume) |
 | `/kaotim-plan <request>` | Planning only |
@@ -59,19 +63,14 @@ See the state machine and agent roster in earlier design notes; commands live in
 
 CLI: `python scripts/kaotim.py <subcommand>` (after init: `python .kaotim/bin/kaotim.py`).
 
-### Skills
+### Supporting skills
 
 | Skill | Used for |
 |---|---|
-| `kaotim-planning` | Plan / SPEC / approvals |
 | `tdd` | Red → lock → green |
 | `edge-cases` | EC enumeration and bug review |
 | `arch-comparison` | Architecture options during planning |
 | `pr-writing` | PR title/body from plan + gates |
-| `stack-detection` | Infer stack for `stack.yaml` |
-| `retro` | Improvement proposals from history |
-| `explain-code` | Precise plain-language walkthrough of selected code |
-| `kaotim-tree` | Call-flow tree: all upstream, one downstream, snippets/branches |
 
 ## Supported stacks
 
@@ -116,17 +115,16 @@ py -3 -m unittest discover -s scripts/tests -p "test_*.py"
 | `.cursor-plugin/plugin.json` | present | Plugin manifest |
 | `assets/logo.png` | present | Plugin / marketplace logo |
 | `scripts/kaotim.py`, `scripts/lib/` | present | CLI and libraries (Python) |
-| `commands/`, `agents/`, `skills/`, `rules/` | present | Slash commands, subagents, skills, rules |
+| `agents/`, `skills/`, `rules/` | present | Subagents, slash/supporting skills, rules |
 | `hooks/hooks.json` | present | Test-lock, shell guard, stage-guard |
 | `adapters/`, `templates/` | present | Ecosystem adapters, templates |
 | `config.defaults.yaml` | present | Caps, budgets, model tiers |
 | `fixtures/` | present | Laravel (Pest/PHPUnit), Python |
 | `docs/` | present | Findings, decisions, user guide |
-| `spike/` | historical | M0 throwaway probes |
 
 ## Roadmap
 
-- [x] **M0 – Platform spikes**
+- [x] **M0 – Platform spikes** (findings in docs; spike tree removed)
 - [x] **M1 – Foundations** (Python CLI)
 - [x] **M2 – Stack generation**
 - [x] **M3 – Planning**

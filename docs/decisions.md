@@ -5,13 +5,16 @@ status. "Proposed" items wait for the user's answer to the numbered question in 
 
 ## M0: Platform spikes (2026-10-19)
 
-**Delivered.** Throwaway spike plugin and probes (`spike/`), `docs/platform-findings.md`,
-`config.defaults.yaml` (tier draft), fixtures `fixtures/laravel-app` (Laravel 13, Pest),
-`fixtures/laravel-app-phpunit`, `fixtures/python-app` (uv, pytest, ruff, mypy).
+**Delivered.** Throwaway spike plugin and probes (later removed; see note below),
+`docs/platform-findings.md`, `config.defaults.yaml` (tier draft), fixtures
+`fixtures/laravel-app` (Laravel 13, Pest), `fixtures/laravel-app-phpunit`,
+`fixtures/python-app` (uv, pytest, ruff, mypy).
 
 **Acceptance.** Every `VERIFY` item has a finding and a decided fallback. Cursor runtime items are
-`docs-only` because the CLI is not authenticated on the build box; `spike/run_cli_spike.sh`
-upgrades them once the user runs it.
+`docs-only` because the CLI is not authenticated on the build box.
+
+**Note (2026-10-23):** The `spike/` tree was deleted. M0 findings remain in
+`docs/platform-findings.md`.
 
 ### Deviations and design adjustments
 
@@ -25,7 +28,7 @@ upgrades them once the user runs it.
 | D6 | §11 "One CLI: python scripts/kaotim.py" from commands/agents | No plugin-root variable in prompts (V5) | `/kaotim-init` copies scripts to `.kaotim/bin/`; prompts call `python .kaotim/bin/kaotim.py` | Adopted |
 | D7 | §4.4 readonly reviewers save their handoff file | `readonly` forbids file edits and state-changing shell | Readonly agents return the handoff block only; orchestrator saves via `check-handoff --save` | Adopted |
 | D8 | §12.6 token capture | No token counts in hooks or CLI output; model, durations, counts available | Tokens `estimated`; model/duration/counts `measured` from `subagentStart`/`subagentStop` when hooks run | Adopted |
-| D9 | §6 commands | Commands are documented, but Cursor is moving slash commands to skills (`disable-model-invocation: true`); no first-party plugin ships `commands/` | Keep `commands/`; write bodies that work with or without `$ARGUMENTS` substitution | Adopted; switch is Q2 |
+| D9 | §6 commands | Commands are documented, but Cursor is moving slash commands to skills (`disable-model-invocation: true`); no first-party plugin ships `commands/` | **Q2 closed 2026-10-23:** migrate slash entry points to skills under `skills/` (preserve `/kaotim-*` names); delete `commands/`. Bodies still worded for `$ARGUMENTS` with or without substitution | Adopted |
 | D10 | Appendix C.3 affected tests: Pest `--dirty`/`--changed` | Pest 5.3 has only `--dirty`, which selects changed **test** files | Mirror strategy primary; `--dirty` only adds edited tests | Adopted |
 | D11 | Appendix C.3 JUnit rule | Syntax errors leave an empty JUnit file | Empty/missing JUnit or unexpected exit code = wrong-reason red | Adopted |
 | D12 | Appendix E.3 "`<failure>` = assertion" | pytest reports an `ImportError` inside a test body as `<failure>` | Apply wrong-reason signatures to `<failure>` messages too | Adopted |
@@ -72,11 +75,11 @@ upgrades them once the user runs it.
 
 ## M8: Hardening (2026-10-19)
 
-**Delivered.** Unit acceptance suite across M1–M8, `doctor --self` word budgets, `docs/user-guide.md`, README install for Windows Python. Spike retained as historical M0 evidence.
+**Delivered.** Unit acceptance suite across M1–M8, `doctor --self` word budgets, `docs/user-guide.md`, README install for Windows Python.
 
-## Skill wiring (2026-10-20)
+## Skill wiring (2026-10-20; revised 2026-10-23)
 
-**Decided.** Commands and agents name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". `disable-model-invocation: true` (confirmed in Cursor skills docs) on retro, pr-writing, kaotim-planning, stack-detection; tdd, edge-cases, arch-comparison stay auto-invocable.
+**Decided.** Agents and the `/kaotim` orchestrator name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". Slash entry skills use `disable-model-invocation: true` except `kaotim-explain` (auto + slash). Entry skills: `kaotim`, `kaotim-plan`, `kaotim-resume`, `kaotim-explain`, `kaotim-tree`, `kaotim-stack`, `kaotim-init`, `kaotim-doctor`, `kaotim-refresh`, `kaotim-metrics`, `kaotim-retro`. Supporting: `pr-writing` (explicit-only); `tdd`, `edge-cases`, `arch-comparison` stay auto-invocable. `commands/` removed (D9/Q2).
 
 ## Run completion clears state (2026-10-23)
 

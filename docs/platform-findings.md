@@ -2,6 +2,10 @@
 
 Recorded 2026-10-19 for spec v1.0 §16 (V1–V13) and the `VERIFY` items in Appendices C and E.
 
+**Note (2026-10-23):** The throwaway `spike/` tree (plugin, probes, evidence scripts) has been
+removed from the repo. Paths below that mention `spike/` are historical; findings text is kept
+as the M0 record.
+
 **Environment.** Debian 13 x86_64 box; Cursor CLI `2026.10.16-e3cb207` installed with
 `curl https://cursor.com/install -fsS | bash`. PHP 8.4.26, Composer 2.8.8 (apt), Laravel 13.37.0,
 Pest 5.3, PHPUnit 12.5, Python 3.13.5 (system) and 3.9 (uv-managed), uv 0.13.1, git 2.47.3,

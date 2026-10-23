@@ -1,2 +1,0 @@
-exit(red)=1
-exit(collect)=2
