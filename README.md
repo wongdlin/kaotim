@@ -56,11 +56,16 @@ Type `/` in Agent chat and pick a skill. Entry skills are slash-only except `kao
 | `/kaotim-resume` | Continue from `state.json` |
 | `/kaotim-explain` | Explain selected code in precise, simple terms |
 | `/kaotim-tree` | Call-flow tree of selected code (upstream + 1 downstream) |
+| `/kaotim-refactor <goal>` | Scoped, tested, incremental behavior-preserving refactor of attached code |
 | `/kaotim-init` | Copy CLI, config stub, profile |
 | `/kaotim-doctor` | Validate wiring and safety |
 | `/kaotim-refresh` | Propose config/profile updates (diff only) |
 | `/kaotim-metrics` | Metrics summary / trends |
 | `/kaotim-retro` | Improvement proposals from history |
+
+### `/kaotim-refactor`
+
+Slash-only (`disable-model-invocation: true`). Attach or reference the code to refactor and type the goal after the command (no goal → it proposes one). Runs six gated phases — scope, read-only recon (incl. your repo rules), safety net (green baseline / characterization tests / explicit waiver), plan, one-step-at-a-time execute, wrap-up — with low/medium/high risk tiers you confirm. Never guesses, never edits existing tests or public interfaces without confirmation, stops on any failing test, and only suggests commits unless you say "commit as you go". Reference files: `skills/kaotim-refactor/{formats,commits,efficiency,techniques,high-risk}.md`.
 
 CLI: `python scripts/kaotim.py <subcommand>` (after init: `python .kaotim/bin/kaotim.py`).
 
