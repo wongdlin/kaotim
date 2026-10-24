@@ -79,7 +79,7 @@ status. "Proposed" items wait for the user's answer to the numbered question in 
 
 ## Skill wiring (2026-10-20; revised 2026-10-23)
 
-**Decided.** Agents and the `/kaotim` orchestrator name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". Slash entry skills use `disable-model-invocation: true` except `kaotim-explain` (auto + slash). Entry skills: `kaotim`, `kaotim-plan`, `kaotim-resume`, `kaotim-explain`, `kaotim-tree`, `kaotim-init`, `kaotim-doctor`, `kaotim-refresh`, `kaotim-metrics`, `kaotim-retro`. Supporting: `pr-writing` (explicit-only); `tdd`, `edge-cases`, `arch-comparison` stay auto-invocable. `commands/` removed (D9/Q2). `/kaotim-stack` removed in the generic config pivot (below).
+**Decided.** Agents and the `/kaotim` orchestrator name skills explicitly (`Read and follow the `X` skill (skills/X/SKILL.md in the Kaotim plugin)`) because subagent skill visibility is unverified (see platform-findings). Skill descriptions start with "Use when ...". Slash entry skills use `disable-model-invocation: true` except `kaotim-explain` (auto + slash). Entry skills: `kaotim`, `kaotim-plan`, `kaotim-resume`, `kaotim-explain`, `kaotim-tree`, `kaotim-refactor`, `kaotim-init`, `kaotim-doctor`, `kaotim-refresh`, `kaotim-metrics`, `kaotim-retro`. Supporting: `pr-writing` (explicit-only); `tdd`, `edge-cases`, `arch-comparison` stay auto-invocable. `commands/` removed (D9/Q2). `/kaotim-stack` removed in the generic config pivot (below).
 
 ## Run completion clears state (2026-10-23)
 
