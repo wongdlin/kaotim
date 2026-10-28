@@ -34,9 +34,12 @@ Init creates:
 - `.kaotim/bin/` — copied CLI
 - `.kaotim/config.yaml` — stub with empty `commands.*`
 - `.kaotim/project-profile.md` — architecture / conventions for agents
-- gitignore entries for runtime paths
+- a single `.kaotim/` entry in `.gitignore` (whole directory)
 
-Commit `config.yaml` and `project-profile.md` once they look right.
+The entire `.kaotim/` tree is gitignored — including `config.yaml`, `project-profile.md`,
+and `bin/`. Teammates who clone the target repo must run `/kaotim-init` themselves (then
+re-fill `commands.*` / the profile as needed). Older selective `.kaotim/...` ignore lines are
+left alone if already present.
 
 There is **no** `stack.yaml` and no `/kaotim-stack`. If an older install left `.kaotim/stack.yaml`,
 move any test/lint commands into `config.yaml` and delete `stack.yaml` (`/kaotim-doctor` will fail
@@ -104,10 +107,11 @@ PR approval after metrics. Fast lane requires explicit confirmation and stays wi
 
 ## 8. What lives where
 
-**Committed:** `config.yaml`, `project-profile.md` (optional overrides only in config).
+**Committed:** only the `.kaotim/` gitignore entry (and any older selective lines left behind).
+`config.yaml`, `project-profile.md`, and `bin/` stay local — each teammate runs `/kaotim-init`.
 
-**Runtime (gitignored):** `state.json`, `handoffs/`, `gates/`, `worktrees/`, `plans/` (archived
-completed plans), most metrics JSONL.
+**Runtime (gitignored):** the whole `.kaotim/` directory (state, handoffs, gates, worktrees,
+archived plans, metrics, config stub, project profile, and copied CLI).
 
 After `final_gate` + `approvals.pr`, `next-stage` archives `plan.md` → `plans/<id>.md` and clears
 state (before PR open). `create-pr` is best-effort; if it fails, open the PR yourself from

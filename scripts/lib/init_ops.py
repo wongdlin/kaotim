@@ -26,20 +26,36 @@ def copy_cli_to_bin(repo: Path) -> Path:
             shutil.rmtree(target)
         shutil.copytree(src / name, target)
     atomic_write_text(dest_dir / "VERSION", PLUGIN_VERSION + "\n")
-    gi = repo / ".gitignore"
-    needed = [
-        ".kaotim/handoffs/",
-        ".kaotim/gates/",
-        ".kaotim/worktrees/",
-        ".kaotim/plans/",
-        ".kaotim/metrics/*.jsonl",
-        ".kaotim/state.json",
-    ]
-    existing = gi.read_text(encoding="utf-8") if gi.exists() else ""
-    additions = [n for n in needed if n not in existing]
-    if additions:
-        atomic_write_text(gi, existing.rstrip() + "\n" + "\n".join(additions) + "\n")
+    ensure_kaotim_gitignore(repo)
     return dest_script
+
+
+def gitignore_has_whole_kaotim(text: str) -> bool:
+    """True if .gitignore already ignores the entire .kaotim/ directory."""
+    for ln in text.splitlines():
+        stripped = ln.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        # Exact directory ignore (optional leading/trailing slash).
+        if stripped in {".kaotim/", ".kaotim", "/.kaotim/", "/.kaotim"}:
+            return True
+    return False
+
+
+def ensure_kaotim_gitignore(repo: Path) -> bool:
+    """Ensure a single `.kaotim/` entry in the repo .gitignore. Idempotent.
+
+    Leaves any older selective `.kaotim/...` lines alone (harmless under a
+    whole-directory ignore). Returns True if the file was modified.
+    """
+    gi = repo / ".gitignore"
+    existing = gi.read_text(encoding="utf-8") if gi.exists() else ""
+    if gitignore_has_whole_kaotim(existing):
+        return False
+    body = existing.rstrip()
+    updated = ".kaotim/\n" if not body else body + "\n.kaotim/\n"
+    atomic_write_text(gi, updated)
+    return True
 
 
 CONFIG_STUB = """# Repo overrides for Kaotim (merged with plugin config.defaults.yaml).
@@ -132,4 +148,14 @@ def refresh_proposals(repo: Path) -> dict[str, Any]:
             )
     if not (kd / "project-profile.md").exists():
         proposals.append({"file": ".kaotim/project-profile.md", "action": "create", "note": "run /kaotim-init"})
+    gi = repo / ".gitignore"
+    gi_text = gi.read_text(encoding="utf-8") if gi.exists() else ""
+    if not gitignore_has_whole_kaotim(gi_text):
+        proposals.append(
+            {
+                "file": ".gitignore",
+                "action": "add",
+                "note": "Add a single `.kaotim/` entry so the whole Kaotim directory is ignored (config.yaml, project-profile.md, and bin/ are local; each teammate runs /kaotim-init).",
+            }
+        )
     return {"ok": True, "proposals": proposals}
