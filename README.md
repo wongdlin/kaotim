@@ -80,7 +80,9 @@ CLI: `python scripts/kaotim.py <subcommand>` (after init: `python .kaotim/bin/ka
 
 ## Configure your repo
 
-After `/kaotim-init`, edit `.kaotim/config.yaml`:
+After `/kaotim-init`, edit `.kaotim/config.yaml`. Init also adds a single `.kaotim/` entry to
+`.gitignore` (the whole directory, including config, profile, and the copied CLI). Teammates who
+clone the repo must run `/kaotim-init` themselves.
 
 ```yaml
 git:

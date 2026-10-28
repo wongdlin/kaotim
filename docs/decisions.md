@@ -34,7 +34,7 @@ status. "Proposed" items wait for the user's answer to the numbered question in 
 | D12 | Appendix E.3 "`<failure>` = assertion" | pytest reports an `ImportError` inside a test body as `<failure>` | Apply wrong-reason signatures to `<failure>` messages too | Adopted |
 | D13 | V13 env managers | `uv run --project` keeps the caller's cwd | Adapters run `cd <root> && <cmd>` (or `uv run --directory`) | Adopted |
 | D14 | Laravel output parsing | Laravel 13 `laravel/pao` prints JSON when `CURSOR_AGENT=1` | JUnit is authoritative; treat pao JSON as optional stdout; `doctor` reports pao | Adopted |
-| D15 | §2.2 `.kaotim/worktrees/` | Must be gitignored or the main checkout is dirty | `/kaotim-init` ensures the ignore entries (already in §2.2) | Adopted |
+| D15 | §2.2 `.kaotim/` (was selective runtime paths / worktrees) | Must be gitignored or the main checkout is dirty; committing config/bin couples teammates to one machine's install | `/kaotim-init` writes a single `.kaotim/` gitignore entry (idempotent; leaves older selective lines alone). `config.yaml`, `project-profile.md`, and `bin/` are local — teammates run `/kaotim-init`. `/kaotim-refresh` proposes the line on old installs. | Adopted |
 | D16 | §3.1 runtime | Python is missing on native Windows (and Herd on Windows) | **User chose Python** (not Node). Engine is `scripts/kaotim.py`, stdlib + vendored `yaml_lite`. Windows requires an installed Python on PATH (`python` / `py -3`). Hooks/commands use `python`. | Adopted |
 
 ### Fixture notes

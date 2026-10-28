@@ -6,4 +6,4 @@ description: >-
 disable-model-invocation: true
 ---
 
-Run `python .kaotim/bin/kaotim.py refresh`. Show proposals only (e.g. remove legacy stack.yaml, fill empty `commands.test`). Never overwrite user edits silently.
+Run `python .kaotim/bin/kaotim.py refresh`. Show proposals only (e.g. remove legacy stack.yaml, fill empty `commands.test`, add a single `.kaotim/` gitignore entry on old installs). Never overwrite user edits silently.
